@@ -31,6 +31,7 @@ public class Level_interface extends PApplet{
 	private class SerialPot extends SerialComm{
 		
 		static final byte POTENTIOMETER = 1;
+		static final byte NO_CORRECTION = 0;
 		static final byte CORRECTION_LASTBYTE = 2;
 		static final byte BIT12 = 0;
 		static final byte BIT10 = 1;

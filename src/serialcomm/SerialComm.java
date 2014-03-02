@@ -33,7 +33,7 @@ public class SerialComm extends Serial{
 		this.write(FIN);			//< Byte de fin.
 	}
 	
-	private byte[] get_data(byte[] t) {
+	public byte[] get_data(byte[] t) {
 		int i;
 		
 		for (i = t.length - 1; i >= 1; i--)
@@ -46,9 +46,14 @@ public class SerialComm extends Serial{
 	}
 	
 	// Rutina realizada cuando el buffer recibe el caracter de FIN.
-	void serialEvent(Serial port){
-		byte[] t = port.readBytes();
-		buffer = get_data(t);
+	public void serialEvent(Serial port){
+		try{
+			byte[] t = port.readBytes();
+			PApplet.println(t);
+			buffer = get_data(t);
+		}catch(Exception e){
+			PApplet.println(e);
+		}
 	}
 	
 }
