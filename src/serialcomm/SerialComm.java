@@ -40,7 +40,7 @@ public class SerialComm extends Serial{
 			if(t[i] == INICIAR) break;			//< Busca el inicio del bloque de datos.
 		byte[] x = new byte[t.length - i - 1];	//< Nuevo array del tama;o de los datos importantes.
 		i++;
-		for(int j = 0; j < t.length - i - 1; j++)
+		for(int j = 0; j < x.length; j++)
 			x[j] = t[i++];
 		return x;	//< Retorna el array que sera el nuevo buffer.
 	}
