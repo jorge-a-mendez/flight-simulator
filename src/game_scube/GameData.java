@@ -20,7 +20,7 @@ public class GameData {
 	private float pressure_level;
 	
 	public GameData(PApplet p){
-		port = new SerialComm(p, name);
+		port = new SerialComm(p, name, 115200);
 		posicion = new PVector(0,0,0);
 		angle = 0;
 		pressure_level = 0;

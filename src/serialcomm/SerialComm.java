@@ -22,9 +22,9 @@ public class SerialComm extends Serial{
 	
 	byte[] buffer;
 	
-	public SerialComm(PApplet p, String port){
-		super(p, port);
-		bufferUntil(FIN);
+	public SerialComm(PApplet p, String port, int baudrate){
+		super(p, port, baudrate);
+		this.bufferUntil(FIN);
 	}
 	
 	void send_data(String data){
@@ -33,11 +33,11 @@ public class SerialComm extends Serial{
 		this.write(FIN);			//< Byte de fin.
 	}
 	
-	private byte[] get_data(byte[] t) {
+	public byte[] get_data(byte[] t) {
 		int i;
 		
-		for (i = t.length - 1; i >= 0; i--)
-			if(t[i] == INICIAR) break;			//< Busca el inicio del bloque de datos.
+		for (i = t.length - 1; i >= 1; i--)
+			if(t[i] == INICIAR && t[i - 1] == FIN) break;			//< Busca el inicio del bloque de datos.
 		byte[] x = new byte[t.length - i - 1];	//< Nuevo array del tama;o de los datos importantes.
 		i++;
 		for(int j = 0; j < x.length; j++)
@@ -46,9 +46,14 @@ public class SerialComm extends Serial{
 	}
 	
 	// Rutina realizada cuando el buffer recibe el caracter de FIN.
-	void serialEvent(Serial port){
-		byte[] t = port.readBytes();
-		buffer = get_data(t);
+	public void serialEvent(Serial port){
+		try{
+			byte[] t = port.readBytes();
+			PApplet.println(t);
+			buffer = get_data(t);
+		}catch(Exception e){
+			PApplet.println(e);
+		}
 	}
 	
 }
