@@ -9,30 +9,64 @@ package serialcomm;
 import processing.core.*;
 public class Level_interface extends PApplet{
 	
-	static final byte POTENTIOMETER = 1;
-	static final byte CORRECTION_LASTBYTE = 2;
-	
-	SerialComm port;
+	SerialPot port;
 	FillingBar bar;
-	
+	Float t;
 	public void setup(){
-		//port = new SerialComm(this, "COM1");
 		size(320, 150, P2D);
 		bar = new FillingBar(this, 10, 10);
 		bar.set_tam(100);
+		port = new SerialPot(this, "COM5", 115200, SerialPot.BIT12);
 	}
 	
 	public void draw(){
-		background(0);
-		bar.fill(mouseX*100/width);
-		bar.display();
+		t = port.normalize();
+		if(t != null){
+			background(0);
+			bar.fill((int)(t*100));
+			bar.display();
+		}
 	}
 	
-	
-	// Main to execute the Applet...
-	public static void main(String args[]) {
-		PApplet.main(new String[] { "--present", "serialcomm.Level_interface" });
+	private class SerialPot extends SerialComm{
+		
+		static final byte POTENTIOMETER = 1;
+		static final byte CORRECTION_LASTBYTE = 2;
+		static final byte BIT12 = 0;
+		static final byte BIT10 = 1;
+		static final byte BIT8 = 2;
+		
+		int mode;
+		
+		SerialPot(PApplet p, String port, int baudrate, int mode){
+			super(p, port, baudrate);
+			this.mode = mode;
+		}
+		
+		Integer amplitude(){
+			int a = 0;
+			//if(super.buffer == null) return null;
+			if(super.buffer[0] != POTENTIOMETER) return null;
+			a = super.buffer[1] << 8 | super.buffer[2];
+			if(super.buffer[3] == CORRECTION_LASTBYTE) a++;
+			return a;
+		}
+		
+		Float normalize(){
+			if(super.buffer == null) return null;
+			switch(this.mode){
+			case BIT8:
+				return (float)(this.amplitude()/255);
+			case BIT10:
+				return (float)(this.amplitude()/1023);
+			case BIT12:
+				return (float)(this.amplitude()/4095);
+			default:
+				return null;
+			}
+		}
 	}
+	
 
 	private class FillingBar{
 		PVector pos;
