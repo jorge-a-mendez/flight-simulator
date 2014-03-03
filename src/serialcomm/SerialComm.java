@@ -32,17 +32,29 @@ public class SerialComm extends Serial{
 		this.write(data);			//< Data a enviar. Esto debe incluir correction code, data code, data.
 		this.write(FIN);			//< Byte de fin.
 	}
+
+	void read_data(){			//< Polling for data. Solo guarda la ultima trama valida.
+		if(this.available() <= 0) return;
+		byte[] a = this.readBytes();
+		this.buffer = get_data(a);
+	}
 	
 	public byte[] get_data(byte[] t) {
-		int i;
+		int i = t.length - 1, j;
 		
-		for (i = t.length - 1; i >= 1; i--)
-			if(t[i] == INICIAR && t[i - 1] == FIN) break;			//< Busca el inicio del bloque de datos.
-		byte[] x = new byte[t.length - i - 1];	//< Nuevo array del tama;o de los datos importantes.
-		i++;
-		for(int j = 0; j < x.length; j++)
-			x[j] = t[i++];
-		return x;	//< Retorna el array que sera el nuevo buffer.
+		if (t[i] != FIN) {
+			for (--i; i >= 0 && t[i] != FIN; i--);	//< Busca por el caracter FIN en lo recibido hasta el momento.
+		}
+		if (i < 0) return null;						//< Si no lo consigue retorna null
+		
+		for (j = i ; j >= 1; j--)
+			if(t[j] == INICIAR && t[j - 1] == FIN) break;			//< Busca el inicio del bloque de datos.
+		if(j == 0)	return null;									//< Si j = 0 entonces no encontro el inicio de una trama valida.
+		byte[] x = new byte[i - j - 1];								//< Nuevo array del tama;o de los datos importantes.
+		j++;
+		for(i = 0; i < x.length; i++)
+			x[i] = t[j++];
+		return x;													//< Retorna el array que sera el nuevo buffer.
 	}
 	
 	// Rutina realizada cuando el buffer recibe el caracter de FIN.

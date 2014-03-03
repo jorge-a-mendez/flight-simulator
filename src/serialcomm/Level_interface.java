@@ -17,18 +17,18 @@ public class Level_interface extends PApplet{
 		size(320, 150, P2D);
 		bar = new FillingBar(this, 10, 10);
 		bar.set_tam(100);
-		port = new SerialPot(this, "COM4", 115200, SerialPot.BIT12);
+		port = new SerialPot(this, "COM4", 9600, SerialPot.BIT12);
 	}
 	
 	public void draw(){
+		port.read_data();
 		t = port.normalize();
 		if(t != null){
 			background(0);
 			bar.fill((int)(t*100));
 			bar.display();
 		}
-		if(port.available() > 0) println(port.readBytes());
-		//port.write('a');
+		//if(port.available() > 0) println(port.readBytes());		//< For debugging.
 	}
 	
 	private class SerialPot extends SerialComm{
@@ -51,20 +51,23 @@ public class Level_interface extends PApplet{
 			int a = 0;
 			//if(super.buffer == null) return null;
 			if(super.buffer[0] != POTENTIOMETER) return null;
-			a = super.buffer[1] << 8 | super.buffer[2];
+			a = 0 | (super.buffer[1] << 8);
+			a |= (0xFF) & super.buffer[2];
 			if(super.buffer[3] == CORRECTION_LASTBYTE) a++;
 			return a;
 		}
 		
 		Float normalize(){
 			if(super.buffer == null) return null;
+			Integer t = this.amplitude();
+			if(t == null) return null;
 			switch(this.mode){
 			case BIT8:
-				return (float)(this.amplitude()/255);
+				return (float)t / (float) 255.0;
 			case BIT10:
-				return (float)(this.amplitude()/1023);
+				return (float)t / (float) 1023.0;
 			case BIT12:
-				return (float)(this.amplitude()/4095);
+				return (float)t / (float) 4095.0;
 			default:
 				return null;
 			}
@@ -113,13 +116,15 @@ public class Level_interface extends PApplet{
 		}
 	}
 	
-	public void serialEvent(Serial port){
-		try{
+	/*
+	public void serialEvent(Serial port){		//< Quisiera este evento dentro de la clase. Pero debe estar dentro de un PApplet
+		try{									//< Just in case.
 			byte[] t = port.readBytes();
 			println(t);
 			this.port.buffer = this.port.get_data(t);
 		}catch(Exception e){
 			println(e);
 		}
-	}
+	}*/
+	
 }
