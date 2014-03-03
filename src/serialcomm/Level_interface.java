@@ -14,7 +14,7 @@ public class Level_interface extends PApplet{
 	FillingBar bar;
 	Float t;
 	public void setup(){
-		size(320, 150, P2D);
+		size(320, 200, P2D);
 		bar = new FillingBar(this, 10, 10);
 		bar.set_tam(100);
 		port = new SerialPot(this, "COM4", 9600, SerialPot.BIT12);
@@ -82,24 +82,39 @@ public class Level_interface extends PApplet{
 		
 		FillingBar(PApplet p, int x, int y){
 			pos = new PVector(x, y);
-			p.stroke(0);
+			p.noStroke();
 			p.fill(150);
 			outer_rect = createShape(RECT, 0, 0, 300, 100);
-			inner_rect = createShape(RECT, 0, 0, 300, 100);
+			//inner_rect = createShape(RECT, 0, 0, 300, 100);
+			gradient_horizontal(color(255,0,0), color(0,255,0), 300, 100);
 			tam = (float) 0.01;
-			//parent = p;
+			
 		}
 		
 		void fill(int x){
-			inner_rect = createShape(RECT, 0, 0, x*3, 100);
-			inner_rect.setFill(color(155,0,0));
+			outer_rect = createShape(RECT, 300-3*x, 0, x*3, 100);
+			inner_rect.setFill(150);
 		}
+		
+		private void gradient_horizontal(int inicio, int fin, int width, int height){
+			int c; 
+			inner_rect = createShape();
+			inner_rect.beginShape();
+			inner_rect.strokeWeight(1);
+			for (int i = 0; i <= width; i++){
+				c = lerpColor(inicio, fin, map(i,0, width, 0, 1));
+				inner_rect.stroke(c);
+				inner_rect.vertex(i,0);
+				inner_rect.vertex(i, height);
+			}
+			inner_rect.endShape();
+		}	
 		
 		void display(){
 			translate(pos.x, pos.y);
 			scale(tam);
-			shape(outer_rect);
 			shape(inner_rect);
+			shape(outer_rect);
 		}
 		
 		void set_tam(float x){
