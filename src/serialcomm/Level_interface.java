@@ -18,10 +18,10 @@ public class Level_interface extends PApplet{
 		bar = new FillingBar(this, 10, 10);
 		bar.set_tam(100);
 		port = new SerialPot(this, "COM4", 9600, SerialPot.BIT12);
+		thread("reading");
 	}
 	
 	public void draw(){
-		port.read_data();
 		t = port.normalize();
 		if(t != null){
 			background(0);
@@ -49,7 +49,6 @@ public class Level_interface extends PApplet{
 		
 		Integer amplitude(){
 			int a = 0;
-			//if(super.buffer == null) return null;
 			if(super.buffer[0] != POTENTIOMETER) return null;
 			a = 0 | (super.buffer[1] << 8);
 			a |= (0xFF) & super.buffer[2];
@@ -116,15 +115,11 @@ public class Level_interface extends PApplet{
 		}
 	}
 	
-	/*
-	public void serialEvent(Serial port){		//< Quisiera este evento dentro de la clase. Pero debe estar dentro de un PApplet
-		try{									//< Just in case.
-			byte[] t = port.readBytes();
-			println(t);
-			this.port.buffer = this.port.get_data(t);
-		}catch(Exception e){
-			println(e);
-		}
-	}*/
+	//< Thread to poll for new data.
+	public void reading(){
+		for(;;)
+			port.read_data();
+	}
+	
 	
 }

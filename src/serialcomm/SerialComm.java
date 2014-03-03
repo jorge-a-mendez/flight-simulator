@@ -24,16 +24,15 @@ public class SerialComm extends Serial{
 	
 	public SerialComm(PApplet p, String port, int baudrate){
 		super(p, port, baudrate);
-		this.bufferUntil(FIN);
 	}
 	
-	void send_data(String data){
+	public void send_data(String data){
 		this.write(INICIAR);		//< Byte de inicio.
 		this.write(data);			//< Data a enviar. Esto debe incluir correction code, data code, data.
 		this.write(FIN);			//< Byte de fin.
 	}
 
-	void read_data(){			//< Polling for data. Solo guarda la ultima trama valida.
+	public void read_data(){			//< Polling for data. Solo guarda la ultima trama valida.
 		if(this.available() <= 0) return;
 		byte[] a = this.readBytes();
 		this.buffer = get_data(a);
@@ -58,7 +57,7 @@ public class SerialComm extends Serial{
 	}
 	
 	// Rutina realizada cuando el buffer recibe el caracter de FIN.
-	public void serialEvent(Serial port){
+	/*public void serialEvent(Serial port){
 		try{
 			byte[] t = port.readBytes();
 			PApplet.println(t);
@@ -66,6 +65,6 @@ public class SerialComm extends Serial{
 		}catch(Exception e){
 			PApplet.println(e);
 		}
-	}
+	}*/
 	
 }
