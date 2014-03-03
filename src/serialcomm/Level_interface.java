@@ -7,6 +7,7 @@
  */
 package serialcomm;
 import processing.core.*;
+import processing.serial.Serial;
 public class Level_interface extends PApplet{
 	
 	SerialPot port;
@@ -16,7 +17,7 @@ public class Level_interface extends PApplet{
 		size(320, 150, P2D);
 		bar = new FillingBar(this, 10, 10);
 		bar.set_tam(100);
-		port = new SerialPot(this, "COM5", 115200, SerialPot.BIT12);
+		port = new SerialPot(this, "COM4", 115200, SerialPot.BIT12);
 	}
 	
 	public void draw(){
@@ -26,6 +27,8 @@ public class Level_interface extends PApplet{
 			bar.fill((int)(t*100));
 			bar.display();
 		}
+		if(port.available() > 0) println(port.readBytes());
+		//port.write('a');
 	}
 	
 	private class SerialPot extends SerialComm{
@@ -68,7 +71,6 @@ public class Level_interface extends PApplet{
 		}
 	}
 	
-
 	private class FillingBar{
 		PVector pos;
 		float tam;
@@ -108,6 +110,16 @@ public class Level_interface extends PApplet{
 		
 		int get_height(){
 			return (int)(100 * tam);
+		}
+	}
+	
+	public void serialEvent(Serial port){
+		try{
+			byte[] t = port.readBytes();
+			println(t);
+			this.port.buffer = this.port.get_data(t);
+		}catch(Exception e){
+			println(e);
 		}
 	}
 }
