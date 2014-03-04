@@ -2,7 +2,7 @@
  * 		Level_Interface Class.
  * 			Esta clase implementa una interfaz de prueba para recepcion
  * 			de la data proveniente de un potenciometro. Corresponde a la aplicacion
- * 			PruebaSerial.c
+ * 			pot_prueba en ProcessorExpert.c
  *  ###################################################################################
  */
 package serialcomm;
@@ -13,27 +13,36 @@ public class Level_interface extends PApplet{
 	SerialPot port;
 	FillingBar bar;
 	Float t;
+	float fill;
 	boolean available;
 	
 	public void setup(){
+		
 		size(320, 200, P2D);
 		bar = new FillingBar(this, 10, 10);
 		bar.set_tam(100);
-		port = new SerialPot(this, "COM4", 9600, SerialPot.BIT12);
+		fill = 0;
+		port = new SerialPot(this, "COM2", 9600, SerialPot.BIT12);
 		thread("reading");
+		
 	}
 	
 	public void draw(){
 		t = port.normalize();
 		if(t != null){
 			background(0);
-			bar.fill((int)(t*100));
+			bar.fill(t);
 			bar.display();
 		}
 		//if(port.available() > 0) println(port.readBytes());		//< For debugging.
 	}
 	
-	private class SerialPot extends SerialComm{
+	private class SerialPot extends SerialComm{		
+		/* 
+		 * Extending SerialComm es usado para crear los metodos mas especificos
+		 * para los datos que se reciben y envian. 
+		 * 
+		 */
 		
 		static final byte POTENTIOMETER = 1;
 		static final byte NO_CORRECTION = 0;
@@ -80,22 +89,20 @@ public class Level_interface extends PApplet{
 		float tam;
 		PShape outer_rect;
 		PShape inner_rect;
-		//PApplet parent;
+		
 		
 		FillingBar(PApplet p, int x, int y){
 			pos = new PVector(x, y);
 			p.noStroke();
 			p.fill(150);
 			outer_rect = createShape(RECT, 0, 0, 300, 100);
-			//inner_rect = createShape(RECT, 0, 0, 300, 100);
 			gradient_horizontal(color(255,0,0), color(0,255,0), 300, 100);
 			tam = (float) 0.01;
 			
 		}
 		
-		void fill(int x){
-			outer_rect = createShape(RECT, 300-3*x, 0, x*3, 100);
-			inner_rect.setFill(150);
+		void fill(float x){
+			fill = x;
 		}
 		
 		private void gradient_horizontal(int inicio, int fin, int width, int height){
@@ -103,7 +110,7 @@ public class Level_interface extends PApplet{
 			inner_rect = createShape();
 			inner_rect.beginShape();
 			inner_rect.strokeWeight(1);
-			for (int i = 0; i <= width; i++){
+			for (int i = 0; i < width; i++){
 				c = lerpColor(inicio, fin, map(i,0, width, 0, 1));
 				inner_rect.stroke(c);
 				inner_rect.vertex(i,0);
@@ -113,10 +120,15 @@ public class Level_interface extends PApplet{
 		}	
 		
 		void display(){
+			pushMatrix();
 			translate(pos.x, pos.y);
 			scale(tam);
 			shape(inner_rect);
+			translate(300, 100);
+			scale(fill,1);
+			rotate(-PI);
 			shape(outer_rect);
+			popMatrix();
 		}
 		
 		void set_tam(float x){
@@ -132,7 +144,7 @@ public class Level_interface extends PApplet{
 		}
 	}
 	
-	//< Thread to poll for new data.
+	// Thread to poll for new data.
 	public void reading(){
 		for(;;){
 			available = false;
