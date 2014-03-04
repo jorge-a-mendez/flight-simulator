@@ -13,6 +13,8 @@ public class Level_interface extends PApplet{
 	SerialPot port;
 	FillingBar bar;
 	Float t;
+	boolean available;
+	
 	public void setup(){
 		size(320, 200, P2D);
 		bar = new FillingBar(this, 10, 10);
@@ -132,8 +134,10 @@ public class Level_interface extends PApplet{
 	
 	//< Thread to poll for new data.
 	public void reading(){
-		for(;;)
-			port.read_data();
+		for(;;){
+			available = false;
+			available = port.read_data();
+		}
 	}
 	
 	

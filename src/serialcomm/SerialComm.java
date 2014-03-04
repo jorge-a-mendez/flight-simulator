@@ -32,10 +32,12 @@ public class SerialComm extends Serial{
 		this.write(FIN);			//< Byte de fin.
 	}
 
-	public void read_data(){			//< Polling for data. Solo guarda la ultima trama valida.
-		if(this.available() <= 0) return;
+	public boolean read_data(){			//< Polling for data. Solo guarda la ultima trama valida.
+		if(this.available() <= 0) return false;
 		byte[] a = this.readBytes();
 		this.buffer = get_data(a);
+		if (this.buffer != null) return true;
+		return false;
 	}
 	
 	public byte[] get_data(byte[] t) {
