@@ -58,15 +58,4 @@ public class SerialComm extends Serial{
 		return x;													//< Retorna el array que sera el nuevo buffer.
 	}
 	
-	// Rutina realizada cuando el buffer recibe el caracter de FIN.
-	/*public void serialEvent(Serial port){
-		try{
-			byte[] t = port.readBytes();
-			PApplet.println(t);
-			buffer = get_data(t);
-		}catch(Exception e){
-			PApplet.println(e);
-		}
-	}*/
-	
 }

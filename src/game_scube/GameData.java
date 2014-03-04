@@ -13,7 +13,7 @@ import 	serialcomm.SerialComm;
 import processing.core.*;
 public class GameData {
 	
-	private final String name = "COM1";
+	private final String name = "COM3";
 	SerialComm port;
 	private PVector posicion;
 	private float angle;
