@@ -43,6 +43,10 @@ public class Plane {
 		posActual.add(speed);
 	}
 	
+	void update_pos2(PVector new_pos){
+		posActual = new_pos;		
+	}
+	
 	void display(){
 		parent.pushMatrix();
 		parent.translate(posActual.x, posActual.y, posActual.z);
@@ -51,12 +55,13 @@ public class Plane {
 		parent.rotateZ(angle[Z]);
 		parent.scale(size);
 		parent.shape(plane);
+		parent.popMatrix();
 	}	
 	
 	//Esta clase servira para el manejo de la animacion de las balas al disparar.
 	//Status: En proceso creativo...
 	
 	private class Bala{
-		
+
 	}
 }
