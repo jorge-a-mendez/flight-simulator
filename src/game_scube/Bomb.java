@@ -2,14 +2,14 @@ package game_scube;
 import processing.core.*;
 
 public class Bomb {
-	static final float SPEED = 2;
-	static final float RAD = 10;
+	private static final float SPEED = 2;
+	private static final float RAD = 10;
 	
-	PApplet p;
-	float xpos;
-	float ypos;
-	float zpos;
-	PShape body;
+	private PApplet p;
+	private float xpos;
+	private float ypos;
+	private float zpos;
+	private PShape body;
 	
 	//w es el ancho total, d es la prfundidad total
 	Bomb(PApplet p_, float w, float d){
@@ -31,7 +31,7 @@ public class Bomb {
 		}
 	}
 	
-	public void drawBomb(){
+	public void display(){
 		p.pushMatrix();
 		
 		p.translate(xpos, ypos, zpos);
