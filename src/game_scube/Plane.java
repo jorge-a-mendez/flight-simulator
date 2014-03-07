@@ -46,6 +46,9 @@ public class Plane {
 		if(y != null) angle[Y] = y;
 		if(x != null) angle[Z] = z;
 	}
+	void set_size(float s){
+		size = s;
+	}
 	
 	void update_pos(PVector speed){
 		posActual.add(speed);
