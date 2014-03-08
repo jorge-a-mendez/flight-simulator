@@ -113,8 +113,8 @@ public class Plane {
 					break;
 			}	
 			pos = posActual;
-			speed = new PVector(0,angle[Y],angle[Z]);
-			speed.normalize();
+			speed = new PVector(0,PApplet.sin(angle[X]),PApplet.cos(angle[X]));
+			//speed.normalize();							//< Not needed.
 			bala = parent.createShape(PApplet.SPHERE,rad);
 			bala.setFill(parent.color(133,128,139));
 			bala.setStroke(false);
