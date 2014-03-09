@@ -7,7 +7,6 @@
  */
 package serialcomm;
 import processing.core.*;
-import processing.serial.Serial;
 public class Level_interface extends PApplet{
 	
 	SerialPot port;
@@ -148,7 +147,7 @@ public class Level_interface extends PApplet{
 	public void reading(){
 		for(;;){
 			available = false;
-			available = port.read_data();
+			available = port.read_lastdata();
 		}
 	}
 	
