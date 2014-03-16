@@ -21,7 +21,7 @@ public class Level_interface extends PApplet{
 		bar = new FillingBar(this, 10, 10);
 		bar.set_tam(100);
 		fill = 0;
-		port = new SerialPot(this, "COM2", 9600, SerialPot.BIT12);
+		port = new SerialPot(this, "COM2", 115200, SerialPot.BIT12);
 		thread("reading");
 		
 	}

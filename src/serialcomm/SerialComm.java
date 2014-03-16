@@ -2,6 +2,7 @@ package serialcomm;
 
 import processing.serial.*;
 import processing.core.*;
+
 import java.util.*;
 
 public class SerialComm extends Serial{
@@ -23,9 +24,11 @@ public class SerialComm extends Serial{
 	
 	byte[] buffer;
 	ArrayList<byte[]> trama;
+	PApplet parent;
 	
 	public SerialComm(PApplet p, String port, int baudrate){
 		super(p, port, baudrate);
+		parent = p;
 	}
 	
 	public void send_data(String data){
@@ -38,7 +41,10 @@ public class SerialComm extends Serial{
 		if(this.available() <= 0) return false;
 		byte[] a = this.readBytes();
 		this.buffer = get_data(a);
-		if (this.buffer != null) return true;
+		if (this.buffer != null) {
+			PApplet.println(buffer);
+			return true;
+		}
 		return false;
 	}
 	
@@ -51,7 +57,7 @@ public class SerialComm extends Serial{
 	}
 	
 	
-	public byte[] get_data(byte[] t) { 								//< Esta funcion solo retorna la ultima trama valida recibida.
+	private byte[] get_data(byte[] t) { 								//< Esta funcion solo retorna la ultima trama valida recibida.
 		int i = t.length - 1, j;
 		
 		if (t[i] != FIN) {
@@ -69,7 +75,7 @@ public class SerialComm extends Serial{
 		return x;													//< Retorna el array que sera el nuevo buffer.
 	}
 	
-	public ArrayList<byte[]> split_data(byte[] t){
+	private ArrayList<byte[]> split_data(byte[] t){
 		int i = 0, j;
 		
 		if(t == null) return null;												//< Retorna nulo si t es nulo.
