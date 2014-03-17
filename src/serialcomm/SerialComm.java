@@ -42,7 +42,6 @@ public class SerialComm extends Serial{
 		byte[] a = this.readBytes();
 		this.buffer = get_data(a);
 		if (this.buffer != null) {
-			PApplet.println(buffer);
 			return true;
 		}
 		return false;
