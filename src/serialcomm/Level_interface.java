@@ -59,6 +59,7 @@ public class Level_interface extends PApplet{
 		
 		Integer amplitude(){
 			int a = 0;
+			if(super.buffer == null) return null;
 			if(super.buffer[0] != POTENTIOMETER) return null;
 			a = 0 | (super.buffer[1] << 8);
 			a |= (0xFF) & super.buffer[2];
