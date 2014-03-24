@@ -10,12 +10,6 @@ public class SerialComm extends Serial{
 	static final byte INICIAR = 0;			//< Caracter de inicio de comunicacion.
 	static final byte FIN = (byte) 0xFF;	//< Caracter de fin de comunicacion.
 	
-	// Data codes...
-	static final byte PANELX = 1;
-	static final byte PANELY = 2;
-	static final byte PANELZ = 3;
-	static final byte ACCEL_ANGLE = 4;	
-	static final byte PIEZO = 5;
 	
 	//Correction codes...
 	static final byte NO_CORRECTION = 1;
@@ -23,7 +17,7 @@ public class SerialComm extends Serial{
 	//Atributos...
 	
 	byte[] buffer;
-	ArrayList<byte[]> trama;
+	private ArrayList<byte[]> trama;
 	PApplet parent;
 	
 	public SerialComm(PApplet p, String port, int baudrate){
@@ -105,4 +99,8 @@ public class SerialComm extends Serial{
 		if(trama.isEmpty()) trama = null;										//< Si no se agrego ninguna trama valida a la lista, se retorna null
 		return trama;
 	}	
+	
+	public Iterable<byte[]> data(){
+		return trama;
+	}
 }
