@@ -26,11 +26,17 @@ public class SerialComm extends Serial{
 	}
 	
 	public void send_data(String data){
-		this.write(INICIAR);		//< Byte de inicio.
-		this.write(data);			//< Data a enviar. Esto debe incluir correction code, data code, data.
-		this.write(FIN);			//< Byte de fin.
+		this.write(INICIAR);											//< Byte de inicio.
+		this.write(data);												//< Data a enviar. Esto debe incluir correction code, data code, data.
+		this.write(FIN);												//< Byte de fin.
 	}
-
+	
+	public void send_data(byte[] data){
+		this.write(INICIAR);											//< Byte de inicio.
+		this.write(data);												//< Data a enviar. Esto debe incluir correction code, data code, data.
+		this.write(FIN);												//< Byte de fin.
+	}
+	
 	public boolean read_lastdata(){										//< Polling for data. Solo guarda la ultima trama valida.
 		if(this.available() <= 0) return false;
 		byte[] a = this.readBytes();
