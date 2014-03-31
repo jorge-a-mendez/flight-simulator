@@ -112,8 +112,9 @@ public class GameData extends Thread {
 	}
 	
 	private void set_pressure(byte[] trama) {
+		if(trama.length != 5) return;
 		synchronized(keys[PRESSURE]){
-			
+			pressure_level = (float)trama[2];
 		}
 	}
 	
