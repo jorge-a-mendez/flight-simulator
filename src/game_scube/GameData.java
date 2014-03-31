@@ -27,7 +27,7 @@ public class GameData extends Thread {
 	static final byte PIEZO = 6;
 	
 	
-	private final String name = "COM5";
+	private final String name = "COM6";
 	SerialComm port;
 	private PVector position;
 	private float angle[];
@@ -37,7 +37,7 @@ public class GameData extends Thread {
 	private boolean running;
 	
 	public GameData(PApplet p){
-		port = new SerialComm(p, name, 115200);
+		port = new SerialComm(p, name, 9600);
 		position = new PVector(0,0,0);
 		angle = new float[2];
 		pressure_level = 0;
@@ -100,13 +100,14 @@ public class GameData extends Thread {
 	
 	private void set_angle(byte[] trama) {
 		float a = 0;
-		int correct = 0;
+		int correct = 0, b;
 		if(trama.length != 8) return;
 		correct = 0 | trama[6] & 0x1 | (trama[6] & 0x2) << 7 | (trama[6] & 0x4) << 14 | (trama[6] & 0x8) << 21;			//< Correccion
-		a = 0 | (trama[5] << 24 | trama[4] << 16 | trama[3] << 8 | trama[2]) | correct;									//< Reconstruye el numero en punto flotante.	
+		b = 0 | (trama[2] << 24) | (trama[3] << 16) | (trama[4] << 8) | trama[5] | correct;									//< Reconstruye el numero en punto flotante.	
+		a = Float.intBitsToFloat(b);
 		a = (float) Math.atan(Math.sqrt(a));																			//< Calcula el angulo.
 		synchronized(keys[ANGLE]){
-			angle[ACCEL_ANGLEXZ - 4] = a;																				//< Guarda el valor.
+			angle[trama[1] - ACCEL_ANGLEXZ] = a;																				//< Guarda el valor.
 		}
 	}
 	

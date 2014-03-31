@@ -97,9 +97,8 @@ public class SerialComm extends Serial{
 			// Al llegar aqui se tiene una trama valida de tamano j-i+1
 			
 			byte[] new_trama = new byte[j-i+1];
-			for(int k = i; k < j-i+1; k++) new_trama[k-i] = t[k];				//< Se copia la trama en el nuevo arreglo.
+			for(int k = i; k <= j; k++) new_trama[k-i] = t[k];					//< Se copia la trama en el nuevo arreglo.
 			trama.add(new_trama);												//< Se agrega nueva trama a la lista.
-			
 			i = j + 1;
 		}
 		if(trama.isEmpty()) trama = null;										//< Si no se agrego ninguna trama valida a la lista, se retorna null
