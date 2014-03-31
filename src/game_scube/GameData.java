@@ -1,10 +1,10 @@
-/**	##################################################################################
+/**	#############################################################################################
  * 		GameData Class. 
  * 			Esta clase encapsula los datos necesarios para el manejo del juego. 
  * 			Inicia recepcion de datos a traves del puerto serial, interpreta los datos. 
  * 			Los datos aqui almacenados deben estar procesados para usar directamente
  * 			por las funciones de processing.
- *  ###################################################################################
+ *  #############################################################################################
  */
 
 
@@ -27,7 +27,7 @@ public class GameData extends Thread {
 	static final byte PIEZO = 6;
 	
 	
-	private final String name = "COM3";
+	private final String name = "COM5";
 	SerialComm port;
 	private PVector position;
 	private float angle[];
@@ -45,17 +45,25 @@ public class GameData extends Thread {
 		keys[POSITION] = "position";
 		keys[PRESSURE] = "pressure";
 		keys[ANGLE] = "angle";
-		start();
 	}
 	
 	public void start() {
 		wait = 3;
 		running = true;
+		byte[] begin = {0,1};
+		
+		port.send_data(begin);
+		
+		try{
+			this.wait(3);
+		}catch (Exception e) {
+			
+		}
 		super.start();
 	}
 	
 	public void run() {
-		while(running){		//< Main loop of the thread.
+		while(running){										//< Main loop of the thread.
 			
 			if(port.read_alldata()){
 				for(byte[] a : port.data()){				//< Procesa cada trama en la lista.
@@ -140,4 +148,30 @@ public class GameData extends Thread {
 		}
 		return p;
 	}
+	
+	public String toString() {
+		StringBuilder s = new StringBuilder();
+		s.append("\n\n");
+		s.append(keys[POSITION]);
+		s.append(" -> ");
+		synchronized(keys[POSITION]) {
+			s.append(position.toString());
+		}
+		s.append("\n\n");
+		s.append(keys[ANGLE]);
+		s.append(" -> ");
+		synchronized(keys[ANGLE]) {
+			s.append("Angle XZ: " + angle[0]);
+			s.append("   Angle YZ: " + angle[1]);
+		}
+		s.append("\n\n");
+		s.append(keys[PRESSURE]);
+		s.append(" -> ");
+		synchronized(keys[PRESSURE]) {
+			s.append(pressure_level);
+		}
+		
+		return s.toString();
+	}
+	
 }
