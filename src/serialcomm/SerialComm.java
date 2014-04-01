@@ -3,7 +3,8 @@ package serialcomm;
 import processing.serial.*;
 import processing.core.*;
 
-import java.util.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class SerialComm extends Serial{
 	
@@ -17,12 +18,14 @@ public class SerialComm extends Serial{
 	//Atributos...
 	
 	byte[] buffer;
-	private ArrayList<byte[]> trama;
+	private BlockingQueue<byte[]> trama;
 	PApplet parent;
 	
 	public SerialComm(PApplet p, String port, int baudrate){
 		super(p, port, baudrate);
 		parent = p;
+		this.bufferUntil(FIN);
+		trama = new LinkedBlockingQueue<byte[]>();
 	}
 	
 	public void send_data(String data){
@@ -47,12 +50,10 @@ public class SerialComm extends Serial{
 		return false;
 	}
 	
-	public boolean read_alldata(){										//< Poll for new data. Crea lista con tramas validas recibidas.
-		if(this.available() <= 0) return false;
+	public void read_alldata(){										//< Poll for new data. Crea lista con tramas validas recibidas.
+		if(this.available() <= 0) return;
 		byte[] b = this.readBytes();
-		this.trama = split_data(b);
-		if(this.trama != null) return true;
-		return false;
+		split_data(b);
 	}
 	
 	
@@ -74,38 +75,53 @@ public class SerialComm extends Serial{
 		return x;													//< Retorna el array que sera el nuevo buffer.
 	}
 	
-	private ArrayList<byte[]> split_data(byte[] t){
+	private void split_data(byte[] t){
 		int i = 0, j;
 		
-		if(t == null) return null;												//< Retorna nulo si t es nulo.
-		if(t.length == 4) return null;											//< Si t no contiene el tama;o min de una trama retorna null.
+		if(t == null) return;														//< Retorna nulo si t es nulo.
+		if(t.length <= 4) return;													//< Si t no contiene el tama;o min de una trama retorna null.
 		
-		ArrayList<byte[]> trama = new ArrayList<byte[]>();
 		
 		while(i < t.length){
 			
 			if(t[i] != INICIAR) {
 				i++;
-				while(i < t.length && t[i] != INICIAR)  i++; 					//< Busca el inicio de alguna trama.
+				while(i < t.length && t[i] != INICIAR)  i++; 						//< Busca el inicio de alguna trama.
 			}
 			j = i;
 			if(i == t.length) break;
 			
-			while(j < t.length && t[j] != FIN) j++;								//< Busca el fin de la trama.
+			while(j < t.length && t[j] != FIN) j++;									//< Busca el fin de la trama.
 			if(j == t.length) break;
 			
 			// Al llegar aqui se tiene una trama valida de tamano j-i+1
-			
-			byte[] new_trama = new byte[j-i+1];
-			for(int k = i; k <= j; k++) new_trama[k-i] = t[k];					//< Se copia la trama en el nuevo arreglo.
-			trama.add(new_trama);												//< Se agrega nueva trama a la lista.
+			if (j-i+1 > 4){
+				byte[] new_trama = new byte[j-i+1];
+			 
+				for(int k = i; k <= j; k++) new_trama[k-i] = t[k];					//< Se copia la trama en el nuevo arreglo.
+				try {
+					trama.put(new_trama);											//< Se agrega nueva trama a la lista.
+				} catch (Exception e) {
+					PApplet.println(e);
+				}
+			}
 			i = j + 1;
 		}
-		if(trama.isEmpty()) trama = null;										//< Si no se agrego ninguna trama valida a la lista, se retorna null
-		return trama;
 	}	
 	
 	public Iterable<byte[]> data(){
 		return trama;
+	}
+	
+	public void get_trama() {
+		read_alldata();
+	}
+	
+	public boolean data_available() {
+		return !trama.isEmpty();
+	}
+	
+	public byte[] get_next() throws InterruptedException {
+		return trama.take();
 	}
 }

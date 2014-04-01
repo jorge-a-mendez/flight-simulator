@@ -11,7 +11,6 @@
 package game_scube;
 import 	serialcomm.SerialComm; 
 import processing.core.*;
-import  java.lang.Math.*;
 public class GameData extends Thread {
 	
 	public static final byte POSITION = 0;
@@ -37,7 +36,7 @@ public class GameData extends Thread {
 	private boolean running;
 	
 	public GameData(PApplet p){
-		port = new SerialComm(p, name, 9600);
+		port = new SerialComm(p, name, 57600);
 		position = new PVector(0,0,0);
 		angle = new float[2];
 		pressure_level = 0;
@@ -55,7 +54,7 @@ public class GameData extends Thread {
 		port.send_data(begin);
 		
 		try{
-			this.wait(3);
+			this.wait(5, 5000);									//< Espera que se comience a adquirir datos.
 		}catch (Exception e) {
 			
 		}
@@ -63,30 +62,32 @@ public class GameData extends Thread {
 	}
 	
 	public void run() {
+		byte[] a = null;
 		while(running){										//< Main loop of the thread.
-			
-			if(port.read_alldata()){
-				for(byte[] a : port.data()){				//< Procesa cada trama en la lista.
-					switch(a[1]){
-					case PANELX:
-					case PANELY:
-					case PANELZ:
-						set_position(a);
-						break;
-					case ACCEL_ANGLEXZ:
-					case ACCEL_ANGLEYZ:
-						set_angle(a);
-						break;
-					case PIEZO:
-						set_pressure(a);
-						break;
-					}
+			if(port.data_available()){
+				
+				try {
+					a = port.get_next();					//< Procesa siguiente trama en la cola.
+				} catch (Exception e) {
+					PApplet.println(e);
 				}
-			}
-			try{
-				Thread.sleep(wait);
-			}catch(Exception e){
-				PApplet.println(e);
+				
+				PApplet.println(a);
+				switch(a[1]){
+				case PANELX:
+				case PANELY:
+				case PANELZ:
+					set_position(a);
+					break;
+				case ACCEL_ANGLEXZ:
+				case ACCEL_ANGLEYZ:
+					set_angle(a);
+					break;
+				case PIEZO:
+					set_pressure(a);
+					break;
+				}
+				
 			}
 		}
 	}
