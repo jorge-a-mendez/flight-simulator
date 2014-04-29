@@ -32,8 +32,7 @@ public class GameData extends Thread {
 	private float angle[];
 	private float pressure_level;
 	private String[] keys;						//< Keys to sync
-	private int wait;							//< Time to wait
-	private boolean running;
+	GameDataThread thread;
 	
 	public GameData(PApplet p){
 		port = new SerialComm(p, name, 57600);
@@ -44,57 +43,9 @@ public class GameData extends Thread {
 		keys[POSITION] = "position";
 		keys[PRESSURE] = "pressure";
 		keys[ANGLE] = "angle";
-	}
-	
-	public void start() {
-		wait = 3;
-		running = true;
-		byte[] begin = {0,1};
 		
-		port.send_data(begin);
-		
-		try{
-			this.wait(5, 5000);									//< Espera que se comience a adquirir datos.
-		}catch (Exception e) {
-			
-		}
-		super.start();
-	}
-	
-	public void run() {
-		byte[] a = null;
-		while(running){										//< Main loop of the thread.
-			if(port.data_available()){
-				
-				try {
-					a = port.get_next();					//< Procesa siguiente trama en la cola.
-				} catch (Exception e) {
-					PApplet.println(e);
-				}
-				
-				PApplet.println(a);
-				switch(a[1]){
-				case PANELX:
-				case PANELY:
-				case PANELZ:
-					set_position(a);
-					break;
-				case ACCEL_ANGLEXZ:
-				case ACCEL_ANGLEYZ:
-					set_angle(a);
-					break;
-				case PIEZO:
-					set_pressure(a);
-					break;
-				}
-				
-			}
-		}
-	}
-	
-	public void quit() {
-		running = false;
-		interrupt();						//< Si el hilo esta esperando.
+		thread = new GameDataThread();
+		thread.start();
 	}
 	
 	// Private setters.
@@ -102,13 +53,16 @@ public class GameData extends Thread {
 	private void set_angle(byte[] trama) {
 		float a = 0;
 		int correct = 0, b;
-		if(trama.length != 8) return;
-		correct = 0 | trama[6] & 0x1 | (trama[6] & 0x2) << 7 | (trama[6] & 0x4) << 14 | (trama[6] & 0x8) << 21;			//< Correccion
-		b = 0 | (trama[2] << 24) | (trama[3] << 16) | (trama[4] << 8) | trama[5] | correct;									//< Reconstruye el numero en punto flotante.	
-		a = Float.intBitsToFloat(b);
-		a = (float) Math.atan(Math.sqrt(a));																			//< Calcula el angulo.
+																				//< Calcula el angulo.
 		synchronized(keys[ANGLE]){
-			angle[trama[1] - ACCEL_ANGLEXZ] = a;																				//< Guarda el valor.
+			if(trama.length != 8) return;
+			correct = 0 | trama[6] & 0x1 | (trama[6] & 0x2) << 7 | (trama[6] & 0x4) << 14 | (trama[6] & 0x8) << 21;			//< Correccion
+			b = 0 | (trama[2] << 24) | (trama[3] << 16) | (trama[4] << 8) | trama[5] | correct;									//< Reconstruye el numero en punto flotante.	
+			a = Float.intBitsToFloat(b);
+			if (a != Float.NaN) {
+				a = (float) Math.atan(Math.sqrt(Math.abs(a)) * Math.signum(a));	
+				angle[trama[1] - ACCEL_ANGLEXZ] = a;																				//< Guarda el valor.
+			}
 		}
 	}
 	
@@ -124,7 +78,6 @@ public class GameData extends Thread {
 			
 		}
 	}
-	
 	
 	//Public getters...
 	
@@ -164,8 +117,8 @@ public class GameData extends Thread {
 		s.append(keys[ANGLE]);
 		s.append(" -> ");
 		synchronized(keys[ANGLE]) {
-			s.append("Angle XZ: " + angle[0]);
-			s.append("   Angle YZ: " + angle[1]);
+			s.append("Angle XZ: " + Math.toDegrees(angle[0]));
+			s.append("   Angle YZ: " + Math.toDegrees(angle[1]));
 		}
 		s.append("\n\n");
 		s.append(keys[PRESSURE]);
@@ -177,4 +130,61 @@ public class GameData extends Thread {
 		return s.toString();
 	}
 	
+	private class GameDataThread extends Thread {
+		private boolean running;
+		
+		GameDataThread() {
+			running = false;
+		}
+		
+		public void start() {
+			running = true;
+			byte[] begin = {0,1};
+			
+			port.send_data(begin);
+			
+			/*try{
+				this.wait(5, 5000);									//< Espera que se comience a adquirir datos.
+			}catch (Exception e) {
+				
+			} */
+			super.start();
+		}
+		
+		public void run() {
+			byte[] a = null;
+			while(running){										//< Main loop of the thread.
+				if(port.data_available()){		
+					try {
+						a = port.get_next();					//< Procesa siguiente trama en la cola.
+					} catch (Exception e) {
+						PApplet.println(e);
+					}
+					//PApplet.println(a);
+					switch(a[1]){
+					case PANELX:
+					case PANELY:
+					case PANELZ:
+						set_position(a);
+						break;
+					case ACCEL_ANGLEXZ:
+					case ACCEL_ANGLEYZ:
+						set_angle(a);
+						break;
+					case PIEZO:
+						set_pressure(a);
+						break;
+					}
+					
+				}
+			}
+		}
+		
+		public void quit() {
+			running = false;
+			interrupt();						//< Si el hilo esta esperando.
+		}
+	}
 }
+
+
