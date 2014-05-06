@@ -142,12 +142,6 @@ public class GameData extends Thread {
 			byte[] begin = {0,1};
 			
 			port.send_data(begin);
-			
-			/*try{
-				this.wait(5, 5000);									//< Espera que se comience a adquirir datos.
-			}catch (Exception e) {
-				
-			} */
 			super.start();
 		}
 		
