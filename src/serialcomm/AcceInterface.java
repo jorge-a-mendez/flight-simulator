@@ -1,5 +1,4 @@
 package serialcomm;
-import game_scube.GameData;
 import processing.core.*;
 public class AcceInterface extends PApplet{
 	
@@ -13,10 +12,12 @@ public class AcceInterface extends PApplet{
 	
 	public void setup(){
 		size(300, 100);
-		port = new SerialComm(this, "COM2", 115200);
+		port = new SerialComm(this, "COM1", 57600);
 		angle = new Float[2];
 		angle[1] = (float) 0.0;
 		angle[0] = (float) 0.0;
+		byte[] start = {0,1};
+		port.send_data(start);
 		font = loadFont("ComicSansMS-16.vlw");
 	}
 	
@@ -44,14 +45,15 @@ public class AcceInterface extends PApplet{
 	}
 	
 	private void set_angle(byte[] trama) {
-		float a = 0;
+		Float a = (float)0;
 		int correct = 0, b;
 																				//< Calcula el angulo.
 		if(trama.length != 8) return;
 		correct = 0 | trama[6] & 0x1 | (trama[6] & 0x2) << 7 | (trama[6] & 0x4) << 14 | (trama[6] & 0x8) << 21;			//< Correccion
-		b = 0 | (trama[2] << 24) | (trama[3] << 16) | (trama[4] << 8) | trama[5] | correct;									//< Reconstruye el numero en punto flotante.	
+		b = (trama[2] << 24) | (trama[3] << 16) & 0x00FFFFFF | (trama[4] << 8) & 0x0000FFFF | trama[5] & 0x000000FF | correct;									//< Reconstruye el numero en punto flotante.	
 		a = Float.intBitsToFloat(b);
-		if (a != Float.NaN) {
+		if (!Float.isNaN(a)) {
+			//println(a);
 			a = (float) Math.atan(Math.sqrt(Math.abs(a)) * Math.signum(a));	
 			angle[trama[1] - ACCEL_ANGLEXZ] = (float) Math.toDegrees(a);																				//< Guarda el valor.
 		}
