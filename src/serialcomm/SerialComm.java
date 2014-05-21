@@ -53,7 +53,14 @@ public class SerialComm extends Serial{
 	public void read_alldata() {										//< Poll for new data. Crea lista con tramas validas recibidas.
 		if(this.available() <= 0) return;
 		byte[] b = this.readBytes();
-		split_data(b);
+		PApplet.println(b);
+		//split_data(b);
+		b = get_data(b);
+		try {
+			trama.put(b);											//< Se agrega nueva trama a la lista.
+		} catch (Exception e) {
+			PApplet.println(e);
+		}
 	}	
 	
 	private byte[] get_data(byte[] t) { 								//< Esta funcion solo retorna la ultima trama valida recibida.
@@ -65,10 +72,11 @@ public class SerialComm extends Serial{
 		if (i < 0) return null;										//< Si no lo consigue retorna null
 		
 		for (j = i ; j >= 1; j--)
-			if(t[j] == INICIAR && t[j - 1] == FIN) break;			//< Busca el inicio del bloque de datos.
-		if(j == 0)	return null;									//< Si j = 0 entonces no encontro el inicio de una trama valida.
-		byte[] x = new byte[i - j - 1];								//< Nuevo array del tama;o de los datos importantes.
-		j++;
+			if(t[j] == INICIAR && t[j - 1] == FIN) 
+				break;												//< Busca el inicio del bloque de datos.
+		//if(j == 0)	return null;									//< Si j = 0 entonces no encontro el inicio de una trama valida.
+		byte[] x = new byte[i - j + 1];								//< Nuevo array del tama;o de los datos importantes.
+		//j++;
 		for(i = 0; i < x.length; i++)
 			x[i] = t[j++];
 		return x;													//< Retorna el array que sera el nuevo buffer.
