@@ -30,6 +30,7 @@ public class Plane {
 	private float size;
 	private float[] angle;
 	private List<Bala> balas = new ArrayList<Bala>();
+	private PositionProcessing pos_proc;
 	
 	Plane(PApplet p, int x, int y, int z){
 		parent = p;
@@ -38,6 +39,7 @@ public class Plane {
 		angle[X] = angle[Y] = angle[Z] = 0;
 		posActual = new PVector(x, y, z);
 		speed = new PVector(0, 0, 0);
+		pos_proc = new PositionProcessing();
 		size = 1;
 	}
 	
@@ -50,12 +52,12 @@ public class Plane {
 		size = s;
 	}
 	
-	void update_pos(PVector speed){
+	/*void update_pos(PVector speed){
 		posActual.add(speed);
-	}
+	}*/
 	
-	void update_pos2(PVector new_pos){
-		posActual = new_pos;		
+	void update_pos(PVector RC){
+		posActual = pos_proc.update_pos(RC);		
 	}
 	
 	void update_balas(float ymax, float zmax){
@@ -138,4 +140,72 @@ public class Plane {
 			parent.popMatrix();
 		}
 	}
+	
+	private class PositionProcessing{
+		private static final float ALPHA = (float)0.007;
+		float[] avg = new float[3];
+		float[] min = new float[3];
+		float[] max = new float[3];
+		
+		PositionProcessing(){
+			int i;
+			for(i = 0; i < 3; i++){
+				avg[i] = 0;
+				min[i] = Float.POSITIVE_INFINITY;
+				max[i] = Float.NEGATIVE_INFINITY;
+			}
+			
+		}
+		
+		PVector update_pos(PVector RC){
+			int i;
+			float[] pos = new float [3];
+			PVector position = new PVector(0, 0, 0);
+			pos[0] = RC.x;
+			pos[1] = RC.y;
+			pos[2] = RC.z;
+			for(i = 0; i < 3; i++){
+				if(pos[i] == 0) continue;
+				auto_cal(pos[i], i);
+				pos[i] = linear(pos[i], i);
+				update_avg(pos[i], i);
+			}
+			position.x = avg[0];
+			position.y = 1-avg[1];
+			position.z = avg[2];
+			return position;
+		}
+		
+		void auto_cal(float pos, int plate){
+			if(pos < min[plate])
+				min[plate] = pos;
+			if(pos > min[plate])
+				max[plate] = pos;
+		}
+		
+		float linear(float pos, int plate){
+			float normalized = normalize(pos, plate);
+			if(normalized == 0)
+				return 1;
+			float linear = PApplet.sqrt(1 / normalized);
+			linear = PApplet.map(linear, 1, (float) 4.5, 0, 1);
+			return PApplet.constrain(linear, 0, 1);
+		}
+		
+		float normalize(float pos, int plate){
+			if(min[plate] == max[plate] || min[plate] == Float.POSITIVE_INFINITY)
+				return 0;
+			float n = PApplet.map(pos, min[plate], max[plate], 0, 1);
+			return PApplet.constrain(n,  0,  1);
+		}
+		
+		void update_avg(float pos, int plate){
+			if(pos == Float.POSITIVE_INFINITY)
+				return;
+			else{
+				avg[plate] = avg[plate] * (1 - ALPHA) + (pos * ALPHA);
+			}
+		}
+	}
 }
+	
