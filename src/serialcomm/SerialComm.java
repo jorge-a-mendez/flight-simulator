@@ -54,8 +54,8 @@ public class SerialComm extends Serial{
 		if(this.available() <= 0) return;
 		byte[] b = this.readBytes();
 		PApplet.println(b);
-		//split_data(b);
-		b = get_data(b);
+		split_data(b);
+		//b = get_data(b);
 		try {
 			trama.put(b);											//< Se agrega nueva trama a la lista.
 		} catch (Exception e) {
