@@ -15,6 +15,9 @@ import processing.core.*;
 
 public class Plane {
 	
+	
+	// Codes to interpret the data
+	
 	private static final int X = 0;
 	private static final int Y = 1;
 	private static final int Z = 2;
@@ -23,42 +26,81 @@ public class Plane {
 	private static final int MEDIUM = 2;
 	private static final int HARD = 3;
 	
-	private PApplet parent;
-	private PShape plane;
-	private PVector posActual;
-	private PVector speed;		//< Maybe it is needed.
-	private float size;
-	private float[] angle;
-	private List<Bala> balas = new ArrayList<Bala>();
-	private PositionProcessing pos_proc;
+	private PApplet parent;										//< Parent window. Need for uses of some methods. Others just allow static access to the method
+	private PShape plane;										//< Plane object
+	private PVector speed;										//< Maybe it is needed.
+	private float size;											//< Size of the plane.
+	private float[] angle;										//< Tilting angle (pitch and roll)
+	private PVector posActual;									//< Plane position vector.
+	private List<Bala> balas = new ArrayList<Bala>();			//< List of bullets
+	private PositionProcessing pos_proc;						//< Processing of the position data given by the charging time of the plates.
 	
-	Plane(PApplet p, int x, int y, int z){
+	
+	/* ########################################################################################
+	 * 		Function: Plane. Constructor of the class.
+	 * 		Parameters:
+	 * 			PApplet p. Applet that owns the object.
+	 * 		Return:
+	 * 			New plane instance.
+	 * ######################################################################################## */
+	
+	
+	Plane(PApplet p){
 		parent = p;
-		plane = p.loadShape("Drone.obj");
-		angle = new float[3];
-		angle[X] = angle[Y] = angle[Z] = 0;
-		posActual = new PVector(x, y, z);
-		speed = new PVector(0, 0, 0);
-		pos_proc = new PositionProcessing();
+		plane = p.loadShape("Drone.obj"); 		//< Load the plane shape from the file.
+		speed = new PVector(0, 0, 0);			//< Speed vector initialize
+		pos_proc = new PositionProcessing();	//< Position processing instantiated
 		size = 1;
 	}
+
 	
-	void set_angles(Float x, Float y, Float z){
-		if(x != null) angle[X] = x;
-		if(y != null) angle[Y] = y;
-		if(x != null) angle[Z] = z;
+	/* ########################################################################################
+	 * 		Function: set_angles. Method for modifying plane's angles
+	 * 		Parameters:
+	 * 			float[] angle. Array of angles to update 'angle' field.
+	 * 		Return:
+	 * 			
+	 * ######################################################################################## */
+	
+	void set_angles(float[] angle){
+		this.angle = angle;
 	}
+	
+	
+	/* ########################################################################################
+	 * 		Function: set_size. Method for modifying plane's size.
+	 * 		Parameters:
+	 * 			float s. Size to update 'size' field
+	 * 		Return:
+	 * 			
+	 * ######################################################################################## */
+	
 	void set_size(float s){
 		size = s;
 	}
 	
-	/*void update_pos(PVector speed){
-		posActual.add(speed);
-	}*/
 	
-	void update_pos(PVector RC){
+	/* ########################################################################################
+	 * 		Function: update_pos. Method for modifying plane's position
+	 * 		Parameters:
+	 * 			float [] RC. Array of RC constants of the capacitive sensors
+	 * 		Return:
+	 * 			
+	 * ######################################################################################## */
+	
+	void update_pos(float[] RC){
 		posActual = pos_proc.update_pos(RC);		
 	}
+	
+	
+	/* ########################################################################################
+	 * 		Function: update_balas. Method for modifying bullets' positions
+	 * 		Parameters:
+	 * 			float ymax. Highest 'y' value of the background (lowest position possible)
+	 * 			float zmax. Highest 'z' value of the background	(deepest position possible)
+	 * 		Return:
+	 * 
+	 * ######################################################################################## */
 	
 	void update_balas(float ymax, float zmax){
 		for(Bala b : balas){
@@ -68,12 +110,20 @@ public class Plane {
 		}
 	}
 	
+	
+	/* ########################################################################################
+	 * 		Function: display. Method for displaying plain and bullets on screen
+	 * 		Parameters:
+	 * 			
+	 * 		Return:
+	 * 			
+	 * ######################################################################################## */
+	
 	void display(){
 		parent.pushMatrix();
 		parent.translate(posActual.x, posActual.y, posActual.z);
-		parent.rotateX(angle[X]);
-		parent.rotateY(angle[Y]);
-		parent.rotateZ(angle[Z]);
+		parent.rotateX(angle[0]);
+		parent.rotateZ(angle[1]);
 		parent.scale(size);
 		parent.shape(plane);
 		for(Bala b : balas){
@@ -81,6 +131,19 @@ public class Plane {
 		}
 		parent.popMatrix();
 	}
+	
+	
+	/* ########################################################################################
+	 * 		Function: shoot. Method for adding a new bullet
+	 * 		Parameters:
+	 * 			int intensity. Intensity of the shot to fire. Possible values:
+	 * 				- NOSHOT
+	 * 				- SOFT
+	 * 				- MEDIUM
+	 * 				- HARD
+	 * 		Return:
+	 * 			
+	 * ######################################################################################## */
 	
 	void shoot(int intensity){
 		if(intensity != NOSHOT){
@@ -92,15 +155,18 @@ public class Plane {
 	//Esta clase servira para el manejo de la animacion de las balas al disparar.
 	//Status: En proceso creativo...
 	
-	private class Bala{
-		private static final int SOFT_RAD = 2;
+	private class Bala {
+		private static final int SOFT_RAD = 2;		//< Bullet radiuses for different intensities
 		private static final int MEDIUM_RAD = 4;
 		private static final int HARD_RAD = 8;
 		
-		private PVector pos;
-		private float rad;
-		private PVector speed;
-		private PShape bala;
+		private PVector pos;			//< Bullet's position
+		private float rad;				//< Bullet's radius
+		private PVector speed;			//< Bullet's speed
+		private PShape bala;			//< Bullet object
+		
+		
+		// Create bullet whose radius depends on shot intensity
 		
 		Bala(int intensity){
 			switch(intensity){
@@ -114,15 +180,17 @@ public class Plane {
 					rad = HARD_RAD;
 					break;
 			}	
-			pos = posActual;
-			speed = new PVector(0,PApplet.sin(angle[X]),PApplet.cos(angle[X]));
+			pos = posActual;		//< Bullet's initial position is plane's position at the time.
+			speed = new PVector(0,PApplet.sin(angle[X]),PApplet.cos(angle[X]));		//< Speed's magnitude 1, direction given by plane's angles.
 			//speed.normalize();							//< Not needed.
 			bala = parent.createShape(PApplet.SPHERE,rad);
 			bala.setFill(parent.color(133,128,139));
 			bala.setStroke(false);
 		}
 		
-		//false si la bala salio del espacio predeterminado
+		
+		// Updates bullet's position if possible, returns false it bullet falls off the space.
+		
 		boolean update_pos(float ymax, float zmax){
 			pos.add(speed);
 			if(pos.y > ymax || pos.z > zmax){
@@ -130,6 +198,9 @@ public class Plane {
 			}
 			return true;
 		}
+		
+		
+		// Display bullet on screen.
 		
 		void display(){
 			parent.pushMatrix();
@@ -141,49 +212,66 @@ public class Plane {
 		}
 	}
 	
-	private class PositionProcessing{
+	private static class PositionProcessing{
 		private static final float ALPHA = (float)0.007;
-		float[] avg = new float[3];
-		float[] min = new float[3];
-		float[] max = new float[3];
+		private static final float width = 200;
+		private static final float height = 200;
+		private static final float depth = 200;
+		private float[] avg = new float[3];
+		private float[] min = new float[3];
+		private float[] max = new float[3];
 		
 		PositionProcessing(){
 			int i;
+			
 			for(i = 0; i < 3; i++){
-				avg[i] = 0;
+				
+				avg[i] = 0;			//< Charging time average of each plate.
+				
+				// Adaptive boundaries of the data.
+				
 				min[i] = Float.POSITIVE_INFINITY;
 				max[i] = Float.NEGATIVE_INFINITY;
 			}
 			
 		}
 		
-		PVector update_pos(PVector RC){
+		PVector update_pos(float[] RC){
 			int i;
-			float[] pos = new float [3];
 			PVector position = new PVector(0, 0, 0);
-			pos[0] = RC.x;
-			pos[1] = RC.y;
-			pos[2] = RC.z;
+			
+			
 			for(i = 0; i < 3; i++){
-				if(pos[i] == 0) continue;
-				auto_cal(pos[i], i);
-				pos[i] = linear(pos[i], i);
-				update_avg(pos[i], i);
+				if(RC[i] == 0) continue;			//< Do nothing if value is zero.
+				auto_cal(RC[i], i);					//< Update the boundaries of the data.
+				RC[i] = linear(RC[i], i);			//< Normalize and linearize the data.
+				update_avg(RC[i], i);				//< Update the average.
 			}
-			position.x = avg[0];
-			position.y = 1-avg[1];
-			position.z = avg[2];
+			
+			
+			// Update the coordinates.
+
+			position.x = PApplet.map(avg[0], 0, 1, 0, width);
+			position.y = PApplet.map(1-avg[1], 0, 1, 0, height);
+			position.z = PApplet.map(1-avg[2], 0, 1, 0, depth);
+			
 			return position;
 		}
 		
-		void auto_cal(float pos, int plate){
+		
+		// Autocalibrate the boundaries of the data.
+		
+		private void auto_cal(float pos, int plate){
 			if(pos < min[plate])
 				min[plate] = pos;
 			if(pos > min[plate])
 				max[plate] = pos;
 		}
 		
-		float linear(float pos, int plate){
+		
+		// Linearize the data from the plates.
+		
+		private float linear(float pos, int plate){
 			float normalized = normalize(pos, plate);
 			if(normalized == 0)
 				return 1;
@@ -192,14 +280,20 @@ public class Plane {
 			return PApplet.constrain(linear, 0, 1);
 		}
 		
-		float normalize(float pos, int plate){
+		
+		// Normalize the values. Transform from the actual range to the range [0,1]
+		
+		private float normalize(float pos, int plate){
 			if(min[plate] == max[plate] || min[plate] == Float.POSITIVE_INFINITY)
 				return 0;
 			float n = PApplet.map(pos, min[plate], max[plate], 0, 1);
 			return PApplet.constrain(n,  0,  1);
 		}
 		
-		void update_avg(float pos, int plate){
+		
+		// Calculate the average position given by the plates using a single pole filter.
+		
+		private void update_avg(float pos, int plate){
 			if(pos == Float.POSITIVE_INFINITY)
 				return;
 			else{

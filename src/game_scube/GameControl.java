@@ -12,7 +12,6 @@ public class GameControl extends PApplet {
 	public void setup(){
 		size(1000, 640, P3D);
 		data = new GameData(this);
-		data.start();
 	}
 	
 	public void draw(){

@@ -10,6 +10,7 @@ public class SerialComm extends Serial{
 	
 	static final byte INICIAR = 0;			//< Caracter de inicio de comunicacion.
 	static final byte FIN = (byte) 0xFF;	//< Caracter de fin de comunicacion.
+	static final int[] LENGTHS = {5, 5, 5, 7, 7, 4};
 	
 	
 	//Correction codes...
@@ -54,8 +55,9 @@ public class SerialComm extends Serial{
 		if(this.available() <= 0) return;
 		byte[] b = this.readBytes();
 		PApplet.println(b);
+		break_data(b);
 		//split_data(b);
-		b = get_data(b);
+		//b = get_data(b);
 		try {
 			trama.put(b);											//< Se agrega nueva trama a la lista.
 		} catch (Exception e) {
@@ -114,7 +116,50 @@ public class SerialComm extends Serial{
 			}
 			i = j + 1;
 		}
-	}	
+	}
+	
+	//More efficient search of valid tramas...
+	private void break_data(byte[] t) {
+		int i = 0, j;
+		
+		if(t == null) return;														//< Retorna nulo si t es nulo.
+		if(t.length <= 4) return;													//< Si t no contiene el tama;o min de una trama retorna null.
+		//PApplet.println(t);
+		
+		while(i < t.length){
+			
+			if(t[i] != INICIAR) {
+				i++;
+				while(i < t.length && t[i] != INICIAR)  i++; 						//< Busca el inicio de alguna trama.
+			}
+			j = i;
+			if(i == t.length - 1) break;
+			
+			if(t[i + 1] - 1 < LENGTHS.length){
+				j = i + LENGTHS[t[i + 1] - 1];									//< Busca el fin de la trama.
+			
+				if(j >= t.length) break;
+				
+				if(t[j] == 0xFF){
+					// Al llegar aqui se tiene una trama valida
+	
+					byte[] new_trama = new byte[j-i+1];
+				 
+					for(int k = i; k <= j; k++) new_trama[k-i] = t[k];					//< Se copia la trama en el nuevo arreglo.
+					try {
+						PApplet.println(new_trama);
+						trama.put(new_trama);											//< Se agrega nueva trama a la lista.
+					} catch (Exception e) {
+						PApplet.println(e);
+					}
+	
+				}
+				i = j + 1;
+			}
+			else
+				i++;
+		}
+	}
 	
 	public Iterable<byte[]> data() {
 		return trama;

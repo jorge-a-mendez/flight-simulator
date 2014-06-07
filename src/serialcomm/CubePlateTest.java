@@ -43,6 +43,7 @@ public class CubePlateTest extends PApplet{
 	}
 
 	void update_screen(){
+	  if(pos == -1) return;
 	  pos = map(pos, 0, 1, 0, height);
 	  println("posh: " + pos);
 	  rect(width/2-width/20, pos, width/10, width/10);
@@ -53,7 +54,7 @@ public class CubePlateTest extends PApplet{
 	  if (reader.data_available()) {
 		  try {
 			a = reader.get_next();
-			println(a);
+			//println(a);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -66,7 +67,11 @@ public class CubePlateTest extends PApplet{
 	float get_position(byte[] trama) {
 		int b = 0, correct= 0;
 		if(trama == null) return -1;
+		
+		//PApplet.println(trama);
+		
 		if(trama.length != 6) return -1;
+		if(trama[1] != 2) return -1;
 		correct = 0 | trama[4] & 0x1 | (trama[4] & 0x2) << 7;													//< Correccion
 		b = (trama[2] << 8) & 0x0000FFFF | (trama[3]) & 0x000000FF | correct;									//< Reconstruye el numero en punto flotante.	
 		return (float) b;
@@ -99,7 +104,7 @@ public class CubePlateTest extends PApplet{
 	}
 
 	void update_avg(float x){
-	    float alpha = (float) 0.2;
+	    float alpha = (float) 0.1;
 	    if(x == Float.POSITIVE_INFINITY)
 	      return;
 	    else {
