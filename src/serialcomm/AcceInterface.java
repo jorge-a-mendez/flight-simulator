@@ -53,7 +53,7 @@ public class AcceInterface extends PApplet{
 		b = (trama[2] << 24) | (trama[3] << 16) & 0x00FFFFFF | (trama[4] << 8) & 0x0000FFFF | trama[5] & 0x000000FF | correct;									//< Reconstruye el numero en punto flotante.	
 		a = Float.intBitsToFloat(b);
 		if (!Float.isNaN(a)) {
-			//println(a);
+			println(a);
 			a = (float) Math.atan(Math.sqrt(Math.abs(a)) * Math.signum(a));	
 			angle[trama[1] - ACCEL_ANGLEXZ] = (float) Math.toDegrees(a);																				//< Guarda el valor.
 		}
