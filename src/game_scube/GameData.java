@@ -26,9 +26,9 @@ public class GameData {
 	static final byte PIEZO = 6;
 	
 	//Data variables.
-	private final String name = "COM6";				//< Communication port name. Just for debugging
+	private final String name = "COM1";				//< Communication port name. Just for debugging
 	SerialComm port;								//< Serial port instance.
-	private int[] position;							//< Contains the RC times of each plate. 
+	private float[] position;							//< Contains the RC times of each plate. 
 	private float angle[];							//< Contains the tilting angle (pitch and roll)
 	private int pressure_level;						//< Last pressure level received.
 	private String[] keys;							//< Keys to sync
@@ -37,8 +37,11 @@ public class GameData {
 	public GameData(PApplet p){
 		port = new SerialComm(p, name, 57600);		//< New port.
 		// Initialize data holders.
-		position = new int[3];						
+		position = new float[3];						
 		angle = new float[2];
+		position[0] = 300;
+		position[1] = 500;
+		position[2] = 100;
 		pressure_level = 0;
 		
 		// Keys to sync the access of the readers and writers to the buffer.
@@ -89,7 +92,7 @@ public class GameData {
 		synchronized(keys[POSITION]) {
 			if (trama.length != 6) return;
 			correct = 0 | trama[6] & 0x1 | (trama[6] & 0x2) << 7;			//< Correction
-			position[trama[2] - 1] = (trama[3] << 8) & 0x0000FFFF | trama[4] & 0x000000FF | correct;		//< Reconstruct the integer out of the code 
+			position[trama[2] - 1] = (float)((trama[3] << 8) & 0x0000FFFF | trama[4] & 0x000000FF | correct);		//< Reconstruct the integer out of the code 
 		}
 	}
 
@@ -99,8 +102,8 @@ public class GameData {
 	
 	// ###########################################################################################################################################
 	
-	public int[] get_position(){
-		int[] p = null;
+	public float[] get_position(){
+		float[] p = null;
 		synchronized(keys[POSITION]){
 			p = position;
 		}

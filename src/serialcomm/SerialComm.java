@@ -54,7 +54,7 @@ public class SerialComm extends Serial{
 	public void read_alldata() {										//< Poll for new data. Crea lista con tramas validas recibidas.
 		if(this.available() <= 0) return;
 		byte[] b = this.readBytes();
-		PApplet.println(b);
+		//PApplet.println(b);
 		break_data(b);
 		//split_data(b);
 		//b = get_data(b);
@@ -134,13 +134,15 @@ public class SerialComm extends Serial{
 			}
 			j = i;
 			if(i == t.length - 1) break;
-			
+			if(t[j+1] != 2) {
+				i++;
+				continue;
+			}
 			if(t[i + 1] - 1 < LENGTHS.length){
 				j = i + LENGTHS[t[i + 1] - 1];									//< Busca el fin de la trama.
 			
 				if(j >= t.length) break;
-				
-				if(t[j] == 0xFF){
+				if(t[j] == -1){
 					// Al llegar aqui se tiene una trama valida
 	
 					byte[] new_trama = new byte[j-i+1];

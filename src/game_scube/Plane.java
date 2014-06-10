@@ -50,7 +50,7 @@ public class Plane {
 		plane = p.loadShape("Drone.obj"); 		//< Load the plane shape from the file.
 		speed = new PVector(0, 0, 0);			//< Speed vector initialize
 		pos_proc = new PositionProcessing();	//< Position processing instantiated
-		size = 1;
+		size = 100;
 	}
 
 	
