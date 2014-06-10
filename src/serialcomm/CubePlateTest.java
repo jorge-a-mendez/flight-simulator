@@ -11,7 +11,7 @@ public class CubePlateTest extends PApplet{
 	long lasttime;
 	public void setup(){
 	  size(800, 600);
-	  reader = new SerialComm(this, SerialComm.list()[1], 115200);
+	  reader = new SerialComm(this, SerialComm.list()[1], 57600);
 	  pos = height;
 	  avg = (float) 0;
 	  min = Float.POSITIVE_INFINITY;
@@ -91,7 +91,7 @@ public class CubePlateTest extends PApplet{
 	    println("normalized: " + normalized);
 	    float linear = sqrt(1 / normalized);
 	    println("linear: " + linear);
-	    linear = map(linear, 1, (float) 4.5, 0, 1);
+	    linear = map(linear, 1, (float) 5, 0, 1);
 	      //minDistance: 1, maxDistance: 4
 	    return constrain(linear, 0, 1);
 	}
@@ -104,7 +104,7 @@ public class CubePlateTest extends PApplet{
 	}
 
 	void update_avg(float x){
-	    float alpha = (float) 0.1;
+	    float alpha = (float) 0.15;
 	    if(x == Float.POSITIVE_INFINITY)
 	      return;
 	    else {

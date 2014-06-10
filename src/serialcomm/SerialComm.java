@@ -140,7 +140,7 @@ public class SerialComm extends Serial{
 			
 				if(j >= t.length) break;
 				
-				if(t[j] == 0xFF){
+				if(t[j] == -1){
 					// Al llegar aqui se tiene una trama valida
 	
 					byte[] new_trama = new byte[j-i+1];
