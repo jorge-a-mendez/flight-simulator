@@ -32,7 +32,7 @@ public class Plane {
 	private float size;											//< Size of the plane.
 	private float[] angle;										//< Tilting angle (pitch and roll)
 	private PVector posActual;									//< Plane position vector.
-	private List<Bala> balas = new ArrayList<Bala>();			//< List of bullets
+	private List<Bala> balas;			//< List of bullets
 	private PositionProcessing pos_proc;						//< Processing of the position data given by the charging time of the plates.
 	
 	
@@ -51,6 +51,7 @@ public class Plane {
 		speed = new PVector(0, 0, 0);			//< Speed vector initialize
 		pos_proc = new PositionProcessing();	//< Position processing instantiated
 		size = 100;
+		balas = new ArrayList<Bala>();
 	}
 
 	
@@ -89,7 +90,8 @@ public class Plane {
 	 * ######################################################################################## */
 	
 	void update_pos(float[] RC){
-		posActual = pos_proc.update_pos(RC);		
+		//posActual = pos_proc.update_pos(RC);
+		posActual = new PVector(500,300,100);
 	}
 	
 	
@@ -122,14 +124,20 @@ public class Plane {
 	void display(){
 		parent.pushMatrix();
 		parent.translate(posActual.x, posActual.y, posActual.z);
-		parent.rotateX(angle[0]);
-		parent.rotateZ(angle[1]);
+		
+		parent.rotateY(PApplet.PI);
+		parent.rotateZ(PApplet.PI + angle[1]);
+		parent.rotateX(-angle[0]);
+		
 		parent.scale(size);
 		parent.shape(plane);
+		
+		parent.popMatrix();
+		
 		for(Bala b : balas){
 			b.display();
 		}
-		parent.popMatrix();
+		
 	}
 	
 	
@@ -152,8 +160,6 @@ public class Plane {
 		}
 	}
 	
-	//Esta clase servira para el manejo de la animacion de las balas al disparar.
-	//Status: En proceso creativo...
 	
 	private class Bala {
 		private static final int SOFT_RAD = 2;		//< Bullet radiuses for different intensities
@@ -206,17 +212,18 @@ public class Plane {
 			parent.pushMatrix();
 			
 			parent.translate(pos.x, pos.y, pos.z);
+			parent.scale(10);
 			parent.shape(bala);
 			
 			parent.popMatrix();
 		}
 	}
 	
-	private static class PositionProcessing{
-		private static final float ALPHA = (float)0.007;
+	private static class PositionProcessing {
+		private static final float ALPHA = (float)0;
 		private static final float width = 200;
 		private static final float height = 200;
-		private static final float depth = 200;
+		private static final float depth = 500;
 		private float[] avg = new float[3];
 		private float[] min = new float[3];
 		private float[] max = new float[3];

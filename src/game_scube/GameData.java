@@ -39,9 +39,9 @@ public class GameData {
 		// Initialize data holders.
 		position = new float[3];						
 		angle = new float[2];
-		position[0] = 300;
-		position[1] = 500;
-		position[2] = 100;
+		position[0] = 500;
+		position[1] = 10;
+		position[2] = 200;
 		pressure_level = 0;
 		
 		// Keys to sync the access of the readers and writers to the buffer.
