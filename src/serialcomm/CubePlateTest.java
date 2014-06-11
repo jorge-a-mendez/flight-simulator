@@ -17,8 +17,7 @@ public class CubePlateTest extends PApplet{
 	  min = Float.POSITIVE_INFINITY;
 	  max = Float.NEGATIVE_INFINITY;
 	  //reader = createReader("data.txt");
-	  //lasttime = millis();
-	  //frameRate(30);
+	  lasttime = millis();
 	}
 
 
@@ -68,12 +67,11 @@ public class CubePlateTest extends PApplet{
 	float get_position(byte[] trama) {
 		int b = 0, correct= 0;
 		if(trama == null) return -1;
-		//PApplet.println("No es null");
+		
 		//PApplet.println(trama);
 		
 		if(trama.length != 6) return -1;
 		if(trama[1] != 2) return -1;
-		
 		correct = 0 | trama[4] & 0x1 | (trama[4] & 0x2) << 7;													//< Correccion
 		b = (trama[2] << 8) & 0x0000FFFF | (trama[3]) & 0x000000FF | correct;									//< Reconstruye el numero en punto flotante.	
 		return (float) b;
@@ -93,7 +91,7 @@ public class CubePlateTest extends PApplet{
 	    println("normalized: " + normalized);
 	    float linear = sqrt(1 / normalized);
 	    println("linear: " + linear);
-	    linear = map(linear, 1, (float) 4, 0, 1);
+	    linear = map(linear, 1, (float) 5, 0, 1);
 	      //minDistance: 1, maxDistance: 4
 	    return constrain(linear, 0, 1);
 	}
