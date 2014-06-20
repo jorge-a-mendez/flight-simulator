@@ -11,7 +11,7 @@ public class CubePlateTest extends PApplet{
 	long lasttime;
 	public void setup(){
 	  size(800, 600);
-	  reader = new SerialComm(this, SerialComm.list()[1], 57600);
+	  reader = new SerialComm(this, SerialComm.list()[0], 57600);
 	  pos = height;
 	  avg = (float) 0;
 	  min = Float.POSITIVE_INFINITY;

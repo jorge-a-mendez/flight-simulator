@@ -18,7 +18,7 @@ public class Background {
 		cube = p.createShape();
 		cube.beginShape(p.QUADS);
 		
-		cube.fill(155);
+		cube.fill(255);
 		
 		//Base...
 		cube.vertex((float)-0.5, (float)0.5, (float)0.5);

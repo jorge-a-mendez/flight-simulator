@@ -15,6 +15,9 @@ import processing.core.*;
 
 public class Plane {
 	
+	public static final float WIDTH = 500;
+	public static final float HEIGHT = 500;
+	public static final float DEPTH = 500;
 	
 	// Codes to interpret the data
 	
@@ -26,14 +29,19 @@ public class Plane {
 	private static final int MEDIUM = 2;
 	private static final int HARD = 3;
 	
+	
+	private static final float[] PLANE_ALPHA = {(float) 0.2, (float) 0.15, (float) 0.15};
+	private static final float[] CAM_ALPHA = {(float) 0.01, (float) 0.01, (float) 0.01};
 	private PApplet parent;										//< Parent window. Need for uses of some methods. Others just allow static access to the method
 	private PShape plane;										//< Plane object
 	private PVector speed;										//< Maybe it is needed.
 	private float size;											//< Size of the plane.
 	private float[] angle;										//< Tilting angle (pitch and roll)
 	private PVector posActual;									//< Plane position vector.
+	private PVector camPos;
 	private List<Bala> balas;			//< List of bullets
 	private PositionProcessing pos_proc;						//< Processing of the position data given by the charging time of the plates.
+	private PositionProcessing camera;
 	
 	
 	/* ########################################################################################
@@ -46,11 +54,13 @@ public class Plane {
 	
 	
 	Plane(PApplet p){
+		
 		parent = p;
 		plane = p.loadShape("Drone.obj"); 		//< Load the plane shape from the file.
 		speed = new PVector(0, 0, 0);			//< Speed vector initialize
-		pos_proc = new PositionProcessing();	//< Position processing instantiated
-		size = 100;
+		pos_proc = new PositionProcessing(PLANE_ALPHA);	//< Position processing instantiated
+		camera = new PositionProcessing(CAM_ALPHA);
+		size = 40;
 		balas = new ArrayList<Bala>();
 	}
 
@@ -65,6 +75,8 @@ public class Plane {
 	
 	void set_angles(float[] angle){
 		this.angle = angle;
+		this.angle[0] = -this.angle[0];
+		this.angle[1] = PApplet.PI - this.angle[1];
 	}
 	
 	
@@ -90,8 +102,16 @@ public class Plane {
 	 * ######################################################################################## */
 	
 	void update_pos(float[] RC){
-		//posActual = pos_proc.update_pos(RC);
-		posActual = new PVector(500,300,100);
+		PVector pos = pos_proc.update_pos(RC);
+		if(pos != null) posActual = pos;
+		//posActual = new PVector(300,300,100);
+		PApplet.println("PosActual : " + posActual);
+		pos = camera.update_pos(RC);
+		if(pos != null) camPos = pos;
+	}
+	
+	PVector get_cam(){
+		return camPos;
 	}
 	
 	
@@ -104,10 +124,10 @@ public class Plane {
 	 * 
 	 * ######################################################################################## */
 	
-	void update_balas(float ymax, float zmax){
-		for(Bala b : balas){
-			if(!(b.update_pos(ymax, zmax))){
-				balas.remove(b);
+	void update_balas(){
+		for(int last = balas.size() - 1; last >= 0; last--){
+			if(!(balas.get(last).update_pos())){
+				balas.remove(last);
 			}
 		}
 	}
@@ -126,8 +146,8 @@ public class Plane {
 		parent.translate(posActual.x, posActual.y, posActual.z);
 		
 		parent.rotateY(PApplet.PI);
-		parent.rotateZ(PApplet.PI + angle[1]);
-		parent.rotateX(-angle[0]);
+		parent.rotateZ(angle[1]);
+		parent.rotateX(angle[0]);
 		
 		parent.scale(size);
 		parent.shape(plane);
@@ -138,6 +158,11 @@ public class Plane {
 			b.display();
 		}
 		
+	}
+	
+	
+	public void reset() {
+		pos_proc.reset();
 	}
 	
 	
@@ -187,7 +212,7 @@ public class Plane {
 					break;
 			}	
 			pos = posActual;		//< Bullet's initial position is plane's position at the time.
-			speed = new PVector(0,PApplet.sin(angle[X]),PApplet.cos(angle[X]));		//< Speed's magnitude 1, direction given by plane's angles.
+			speed = new PVector(0,-3*PApplet.sin(angle[X]),-3*PApplet.cos(angle[X]));		//< Speed's magnitude 1, direction given by plane's angles.
 			//speed.normalize();							//< Not needed.
 			bala = parent.createShape(PApplet.SPHERE,rad);
 			bala.setFill(parent.color(133,128,139));
@@ -197,9 +222,9 @@ public class Plane {
 		
 		// Updates bullet's position if possible, returns false it bullet falls off the space.
 		
-		boolean update_pos(float ymax, float zmax){
+		boolean update_pos(){
 			pos.add(speed);
-			if(pos.y > ymax || pos.z > zmax){
+			if(pos.y > HEIGHT || pos.z > DEPTH){
 				return false;
 			}
 			return true;
@@ -212,25 +237,25 @@ public class Plane {
 			parent.pushMatrix();
 			
 			parent.translate(pos.x, pos.y, pos.z);
-			parent.scale(10);
+			//parent.scale(5);
 			parent.shape(bala);
 			
 			parent.popMatrix();
 		}
+		
 	}
 	
 	private static class PositionProcessing {
-		private static final float ALPHA = (float)0;
-		private static final float width = 200;
-		private static final float height = 200;
-		private static final float depth = 500;
+		private final float ALPHA[];
+		private static final float MAX[] = {(float) 2.2, (float) 2.5, (float) 2.2};
+		
 		private float[] avg = new float[3];
 		private float[] min = new float[3];
 		private float[] max = new float[3];
 		
-		PositionProcessing(){
+		PositionProcessing(float[] alpha){
 			int i;
-			
+			ALPHA = alpha;
 			for(i = 0; i < 3; i++){
 				
 				avg[i] = 0;			//< Charging time average of each plate.
@@ -241,26 +266,33 @@ public class Plane {
 				max[i] = Float.NEGATIVE_INFINITY;
 			}
 			
+			
+			
 		}
 		
 		PVector update_pos(float[] RC){
 			int i;
 			PVector position = new PVector(0, 0, 0);
-			
+			if(RC == null) return null;
 			
 			for(i = 0; i < 3; i++){
 				if(RC[i] == 0) continue;			//< Do nothing if value is zero.
-				auto_cal(RC[i], i);					//< Update the boundaries of the data.
+				if(!auto_cal(RC[i], i)) continue;					//< Update the boundaries of the data.
 				RC[i] = linear(RC[i], i);			//< Normalize and linearize the data.
 				update_avg(RC[i], i);				//< Update the average.
 			}
 			
 			
 			// Update the coordinates.
-
-			position.x = PApplet.map(avg[0], 0, 1, 0, width);
-			position.y = PApplet.map(1-avg[1], 0, 1, 0, height);
-			position.z = PApplet.map(1-avg[2], 0, 1, 0, depth);
+			PApplet.println("avgX: " + avg[0] + "	avgY: " + avg[1] + "	avgZ: " + avg[2]);
+			PApplet.println("minX: " + min[0] + "	maxX: " + max[0]);
+			PApplet.println("minY: " + min[1] + "	maxY: " + max[1]);
+			PApplet.println("minZ: " + min[2] + "	maxZ: " + max[2]);
+			position.x = PApplet.map(avg[0], 0, 1, 0, WIDTH);
+			position.y = PApplet.map(1-avg[1], 0, 1, 0, HEIGHT);
+			position.z = PApplet.map(avg[2], 0, 1, 0, DEPTH);
+			
+			PApplet.println("Pos " + position.toString());
 			
 			return position;
 		}
@@ -268,12 +300,16 @@ public class Plane {
 		
 		// Autocalibrate the boundaries of the data.
 		
-		private void auto_cal(float pos, int plate){
+		private boolean auto_cal(float pos, int plate){
+			//if(max[plate] != Float.NEGATIVE_INFINITY && pos > 1.6 * max[plate] )
+				//return false;
 			if(pos < min[plate])
 				min[plate] = pos;
-			if(pos > min[plate])
+			if(pos > max[plate])
 				max[plate] = pos;
+			return true;
 		}
+		
 		
 		
 		// Linearize the data from the plates.
@@ -283,7 +319,7 @@ public class Plane {
 			if(normalized == 0)
 				return 1;
 			float linear = PApplet.sqrt(1 / normalized);
-			linear = PApplet.map(linear, 1, (float) 4.5, 0, 1);
+			linear = PApplet.map(linear, 1, (float)MAX[plate], 0, 1);
 			return PApplet.constrain(linear, 0, 1);
 		}
 		
@@ -304,7 +340,15 @@ public class Plane {
 			if(pos == Float.POSITIVE_INFINITY)
 				return;
 			else{
-				avg[plate] = avg[plate] * (1 - ALPHA) + (pos * ALPHA);
+				avg[plate] = avg[plate] * (1 - ALPHA[plate]) + (pos * ALPHA[plate]);
+			}
+		}
+		
+		private void reset() {
+			for (int i = 0; i < 3; i++) {
+				avg[i] = 0;
+				min[i] = Float.POSITIVE_INFINITY;
+				max[i] = Float.NEGATIVE_INFINITY;
 			}
 		}
 	}

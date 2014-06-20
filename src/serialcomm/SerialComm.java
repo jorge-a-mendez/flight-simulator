@@ -27,6 +27,7 @@ public class SerialComm extends Serial{
 		parent = p;
 		this.bufferUntil(FIN);
 		trama = new LinkedBlockingQueue<byte[]>();
+		//this.clear();
 	}
 	
 	public void send_data(String data) {
@@ -134,10 +135,10 @@ public class SerialComm extends Serial{
 			}
 			j = i;
 			if(i == t.length - 1) break;
-			if(t[j+1] != 2) {
+			/*if(t[j+1] != 2) {
 				i++;
 				continue;
-			}
+			}*/
 			if(t[i + 1] - 1 < LENGTHS.length){
 				j = i + LENGTHS[t[i + 1] - 1];									//< Busca el fin de la trama.
 			
@@ -149,7 +150,7 @@ public class SerialComm extends Serial{
 				 
 					for(int k = i; k <= j; k++) new_trama[k-i] = t[k];					//< Se copia la trama en el nuevo arreglo.
 					try {
-						PApplet.println(new_trama);
+						//PApplet.println(new_trama);
 						trama.put(new_trama);											//< Se agrega nueva trama a la lista.
 					} catch (Exception e) {
 						PApplet.println(e);

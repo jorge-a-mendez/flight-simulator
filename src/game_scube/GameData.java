@@ -29,6 +29,7 @@ public class GameData {
 	private final String name = "COM1";				//< Communication port name. Just for debugging
 	SerialComm port;								//< Serial port instance.
 	private float[] position;							//< Contains the RC times of each plate. 
+	private boolean pos_ready;
 	private float angle[];							//< Contains the tilting angle (pitch and roll)
 	private int pressure_level;						//< Last pressure level received.
 	private String[] keys;							//< Keys to sync
@@ -75,8 +76,10 @@ public class GameData {
 			a = Float.intBitsToFloat(b);
 			if (a != Float.NaN) {
 				a = (float) Math.atan(Math.sqrt(Math.abs(a)) * Math.signum(a));	
-				angle[trama[1] - ACCEL_ANGLEXZ] = a;																		//< Guarda el valor.
-			}
+				//< Guarda el valor.
+				if (trama[1] == ACCEL_ANGLEXZ) angle[trama[1] - ACCEL_ANGLEXZ] = -a ;
+				if (trama[1] == ACCEL_ANGLEYZ) angle[trama[1] - ACCEL_ANGLEXZ] = a + PApplet.PI;			}
+				PApplet.println("Angle -> " + trama[1] + a);
 		}
 	}
 	
@@ -91,8 +94,11 @@ public class GameData {
 		int correct = 0;
 		synchronized(keys[POSITION]) {
 			if (trama.length != 6) return;
-			correct = 0 | trama[6] & 0x1 | (trama[6] & 0x2) << 7;			//< Correction
-			position[trama[2] - 1] = (float)((trama[3] << 8) & 0x0000FFFF | trama[4] & 0x000000FF | correct);		//< Reconstruct the integer out of the code 
+			correct = 0 | trama[4] & 0x1 | (trama[4] & 0x2) << 7;			//< Correction
+			float x = (float)((trama[2] << 8) & 0x0000FFFF | trama[3] & 0x000000FF | correct);
+			PApplet.println("Test : " + x);
+			position[trama[1] - 1] = x;		//< Reconstruct the integer out of the code 
+			if(trama[1] == PANELZ) pos_ready = true;
 		}
 	}
 
@@ -105,7 +111,10 @@ public class GameData {
 	public float[] get_position(){
 		float[] p = null;
 		synchronized(keys[POSITION]){
-			p = position;
+			if(pos_ready) {
+				p = position.clone();
+				pos_ready = false;
+			}
 		}
 		return p;
 	}
@@ -113,7 +122,7 @@ public class GameData {
 	public float[] get_angle(){
 		float[] a;
 		synchronized(keys[ANGLE]){
-			a = angle;
+			a = angle.clone();
 		}
 		return a;
 	}
@@ -136,7 +145,9 @@ public class GameData {
 		s.append(keys[POSITION]);
 		s.append(" -> ");
 		synchronized(keys[POSITION]) {
-			s.append(position.toString());
+			s.append(" X: " + position[0]);
+			s.append(" Y: " + position[1]);
+			s.append(" Z: " + position[2]);
 		}
 		s.append("\n\n");
 		s.append(keys[ANGLE]);
