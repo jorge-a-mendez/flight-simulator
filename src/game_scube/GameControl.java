@@ -13,17 +13,17 @@ public class GameControl extends PApplet {
 	float h = w/2;
 	
 	public void setup(){
-		size(640, 640, P3D);
+		size(800, 800, P3D);
 		data = new GameData(this);
 		p = new Plane(this);
-		PVector pos = new PVector(250, 250, 250);
+		PVector pos = new PVector(400, 400, 400);
 		p.update_pos(data.get_position());
 		//p.update_pos(pos);
 		float[] angles = new float[2];
 		angles[0] = PI/4;
 		angles[1] = PI/6;
 		p.set_angles(angles);
-		p.shoot(2);
+		p.shoot(1);
 		background(0);
 		b = new Background(this, Plane.WIDTH, pos);
 		b.set_angle(0);
@@ -77,6 +77,7 @@ public class GameControl extends PApplet {
 		
 		if (mouseButton == RIGHT) {
 			p.reset();
+			println("RESETTED");
 		}
 	}
 	

@@ -272,9 +272,10 @@ public class Plane {
 		
 		PVector update_pos(float[] rc){
 			int i;
+			if(rc == null) return null;
 			float[] RC = rc.clone();
 			PVector position = new PVector(0, 0, 0);
-			if(RC == null) return null;
+			
 			
 			for(i = 0; i < 3; i++){
 				if(RC[i] == 0) continue;			//< Do nothing if value is zero.
@@ -302,8 +303,8 @@ public class Plane {
 		// Autocalibrate the boundaries of the data.
 		
 		private boolean auto_cal(float pos, int plate){
-			//if(max[plate] != Float.NEGATIVE_INFINITY && pos > 1.6 * max[plate] )
-				//return false;
+			if(max[plate] != Float.NEGATIVE_INFINITY && pos >= 5 * max[plate] )
+				return false;
 			if(pos < min[plate])
 				min[plate] = pos;
 			if(pos > max[plate])
