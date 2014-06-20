@@ -270,8 +270,9 @@ public class Plane {
 			
 		}
 		
-		PVector update_pos(float[] RC){
+		PVector update_pos(float[] rc){
 			int i;
+			float[] RC = rc.clone();
 			PVector position = new PVector(0, 0, 0);
 			if(RC == null) return null;
 			
