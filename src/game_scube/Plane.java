@@ -38,10 +38,8 @@ public class Plane {
 	private float size;											//< Size of the plane.
 	private float[] angle;										//< Tilting angle (pitch and roll)
 	private PVector posActual;									//< Plane position vector.
-	private PVector camPos;
-	private List<Bala> balas;			//< List of bullets
+	private List<Bala> balas;									//< List of bullets
 	private PositionProcessing pos_proc;						//< Processing of the position data given by the charging time of the plates.
-	private PositionProcessing camera;
 	
 	
 	/* ########################################################################################
@@ -59,7 +57,6 @@ public class Plane {
 		plane = p.loadShape("Drone.obj"); 		//< Load the plane shape from the file.
 		speed = new PVector(0, 0, 0);			//< Speed vector initialize
 		pos_proc = new PositionProcessing(PLANE_ALPHA);	//< Position processing instantiated
-		camera = new PositionProcessing(CAM_ALPHA);
 		size = 40;
 		balas = new ArrayList<Bala>();
 	}
@@ -106,20 +103,14 @@ public class Plane {
 		if(pos != null) posActual = pos;
 		//posActual = new PVector(300,300,100);
 		PApplet.println("PosActual : " + posActual);
-		pos = camera.update_pos(RC);
-		if(pos != null) camPos = pos;
 	}
 	
-	PVector get_cam(){
-		return camPos;
-	}
-	
+
 	
 	/* ########################################################################################
 	 * 		Function: update_balas. Method for modifying bullets' positions
 	 * 		Parameters:
-	 * 			float ymax. Highest 'y' value of the background (lowest position possible)
-	 * 			float zmax. Highest 'z' value of the background	(deepest position possible)
+	 *
 	 * 		Return:
 	 * 
 	 * ######################################################################################## */
@@ -160,6 +151,14 @@ public class Plane {
 		
 	}
 	
+	
+	/* ########################################################################################
+	 * 		Function: reset. Method for reseting the values of the plane.
+	 * 		Parameters:
+	 * 			
+	 * 		Return:
+	 * 			
+	 * ######################################################################################## */
 	
 	public void reset() {
 		pos_proc.reset();
@@ -292,7 +291,7 @@ public class Plane {
 			PApplet.println("minZ: " + min[2] + "	maxZ: " + max[2]);
 			position.x = PApplet.map(avg[0], 0, 1, 0, WIDTH);
 			position.y = PApplet.map(1-avg[1], 0, 1, 0, HEIGHT);
-			position.z = PApplet.map(avg[2], 0, 1, 0, DEPTH);
+			position.z = PApplet.map(avg[2], 0, 1, -DEPTH, 0);
 			
 			PApplet.println("Pos " + position.toString());
 			
@@ -303,7 +302,7 @@ public class Plane {
 		// Autocalibrate the boundaries of the data.
 		
 		private boolean auto_cal(float pos, int plate){
-			if(max[plate] != Float.NEGATIVE_INFINITY && pos >= 5 * max[plate] )
+			if(max[plate] != Float.NEGATIVE_INFINITY && pos >= 2 * max[plate] )
 				return false;
 			if(pos < min[plate])
 				min[plate] = pos;
