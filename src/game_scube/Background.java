@@ -15,30 +15,50 @@ public class Background {
 		this.size = size;
 		this.pos = pos;
 		this.angleY = 0;
-		cube = p.createShape();
-		cube.beginShape(p.QUADS);
+		cube = p.createShape(PApplet.GROUP);
 		
-		cube.fill(255);
 		
+		PShape base = p.createShape();
 		//Base...
-		cube.vertex((float)-0.5, (float)0.5, (float)0.5);
-		cube.vertex((float)0.5, (float)0.5, (float)0.5);
-		cube.vertex((float)0.5, (float)0.5, (float)-0.5);
-		cube.vertex((float)-0.5, (float)0.5, (float)-0.5);
-		cube.vertex((float)-0.5, (float)0.5, (float)0.5);
+		base.beginShape(PApplet.QUAD);
+		base.fill(255);
+		base.stroke(0);
+		base.vertex((float)-0.5, (float)0.5, (float)0.5);
+		base.vertex((float)0.5, (float)0.5, (float)0.5);
+		base.vertex((float)0.5, (float)0.5, (float)-0.5);
+		base.vertex((float)-0.5, (float)0.5, (float)-0.5);
+		base.vertex((float)-0.5, (float)0.5, (float)0.5);
 		
-		//Right vertical face...
-		cube.vertex((float)-0.5, (float)0.5, (float)0.5);
-		cube.vertex((float)-0.5, (float)-0.5, (float)0.5);
-		cube.vertex((float)-0.5, (float)-0.5, (float)-0.5);
-		cube.vertex((float)-0.5, (float)0.5, (float)-0.5);
+		base.endShape();
 		
 		//Left vertical face...
-		cube.vertex((float)-0.5, (float)-0.5, (float)-0.5);
-		cube.vertex((float)0.5, (float)-0.5, (float)-0.5);
-		cube.vertex((float)0.5, (float)0.5, (float)-0.5);
+		PShape left = p.createShape();
+		left.beginShape(PApplet.QUAD);
+		left.fill(255);
+		left.stroke(0);
+		left.vertex((float)-0.5, (float)0.5, (float)0.5);
+		left.vertex((float)-0.5, (float)-0.5, (float)0.5);
+		left.vertex((float)-0.5, (float)-0.5, (float)-0.5);
+		left.vertex((float)-0.5, (float)0.5, (float)-0.5);
+		left.vertex((float)-0.5, (float)0.5, (float)0.5);
+		left.endShape();
 		
-		cube.endShape();
+		//Front vertical face...
+		
+		PShape front = p.createShape();
+		front.beginShape(PApplet.QUAD);
+		front.fill(255);
+		front.stroke(0);
+		front.vertex((float)-0.5, (float)-0.5, (float)-0.5);
+		front.vertex((float)0.5, (float)-0.5, (float)-0.5);
+		front.vertex((float)0.5, (float)0.5, (float)-0.5);
+		front.vertex((float)-0.5, (float)0.5, (float)-0.5);
+		front.vertex((float)-0.5, (float)-0.5, (float)-0.5);
+		front.endShape();
+		
+		cube.addChild(left);
+		cube.addChild(front);
+		cube.addChild(base);
 	}
 	
 	void set_pos(int x, int y, int z){
